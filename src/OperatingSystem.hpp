@@ -6,24 +6,25 @@
 #include <vector>
 
 #include "Cpu.hpp"
-#include "Process.hpp"
 #include "Scheduler.hpp"
 
 using namespace std;
 
-#define CORES_COUNT 4
+#define CORES_COUNT 1
 
 class OperatingSystem {
  private:
-    vector<Cpu> cores;
+  vector<Cpu> cores;
+
+  Ram *ram;
 
  public:
-  OperatingSystem(Scheduler scheduler);
+  OperatingSystem(Scheduler* scheduler, Ram *ram);
 
   vector<Process> processes;
-  Scheduler scheduler;
+  Scheduler* scheduler;
 
-  void boot();
+  void insert_process(Process process);
 };
 
 void *run_os(void *arg);

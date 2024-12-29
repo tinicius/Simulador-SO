@@ -2,10 +2,9 @@
 #define GLOBALS_HPP
 
 #include <pthread.h>
-
 #include <queue>
 
-#include "Process.hpp"
+#include "entities.hpp"
 
 using namespace std;
 

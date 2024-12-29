@@ -1,11 +1,11 @@
 #ifndef SCHEDULER_HPP
 #define SCHEDULER_HPP
 
+#include <pthread.h>
 #include <iostream>
 #include <vector>
-#include <pthread.h>
 
-#include "Process.hpp"
+#include "entities.hpp"
 
 using namespace std;
 
@@ -13,9 +13,9 @@ extern pthread_mutex_t running_mutex;
 
 class Scheduler {
  private:
-  vector<int> running;
-  vector<int> ready;
-  vector<int> terminated;
+  vector<int> running;     // PIDs of running processes
+  vector<int> ready;       // PIDs of ready processes
+  vector<int> terminated;  // PIDs of terminated processes
 
  public:
   Scheduler();

@@ -5,7 +5,7 @@ pthread_mutex_t running_mutex = PTHREAD_MUTEX_INITIALIZER;
 Scheduler::Scheduler() {}
 
 Scheduler::Scheduler(vector<Process>& processes) {
-  for (auto p : processes) this->running.push_back(p.get_pid());
+  for (auto p : processes) this->running.push_back(p.pid);
 }
 
 int Scheduler::get_next_process_pid() {

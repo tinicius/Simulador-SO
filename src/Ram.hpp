@@ -3,19 +3,27 @@
 
 #include <fstream>
 #include <iostream>
+#include <string>
+#include <vector>
+
+#include "entities.hpp"
 
 using namespace std;
 
-#define MAX_SIZE 32
-
 class Ram {
  private:
-  int values[MAX_SIZE];
+  vector<vector<string>> codes;      // Regiao com os programas
+  vector<ProcessControlBlock> PCBs;  // Regiao com os PCBs
 
  public:
   Ram();
-  int get_value(int address);
-  void set_value(int address, int value);
+
+  void insert_code(vector<string> code);
+  void insert_PCB(ProcessControlBlock PCB);
+
+  string get_instruction(int code_address, int PC);
+
+  ProcessControlBlock get_PCB(int pcb_address);
 };
 
 #endif

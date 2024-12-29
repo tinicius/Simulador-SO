@@ -1,12 +1,13 @@
 #include "OperatingSystem.hpp"
 
-OperatingSystem::OperatingSystem(Scheduler scheduler) {
+OperatingSystem::OperatingSystem(Scheduler* scheduler, Ram *ram) {
   this->scheduler = scheduler;
+  this->ram = ram;
 
   pthread_t t_core[CORES_COUNT];
 
   for (int i = 0; i < CORES_COUNT; i++) {
-    Cpu core(i);
+    Cpu core(i, ram);
     cores.push_back(core);
   }
 
@@ -15,11 +16,8 @@ OperatingSystem::OperatingSystem(Scheduler scheduler) {
   }
 }
 
-void OperatingSystem::boot() {
-  for (int i = 0; i < 10; i++) {
-    Process p(i, 0, READY);
-    processes.push_back(p);
-  }
+void OperatingSystem::insert_process(Process process) {
+  this->processes.push_back(process);
 }
 
 void *run_os(void *arg) {
@@ -30,7 +28,7 @@ void *run_os(void *arg) {
 
     pthread_mutex_lock(&next_process_mutex);
 
-    int next_pid = os->scheduler.get_next_process_pid();
+    int next_pid = os->scheduler->get_next_process_pid();
 
     if (next_pid == -1) {
       pthread_mutex_unlock(&next_process_mutex);
@@ -40,7 +38,7 @@ void *run_os(void *arg) {
     Process *next_p = nullptr;
 
     for (auto &p : os->processes) {
-      if (p.get_pid() != next_pid) continue;
+      if (p.pid != next_pid) continue;
 
       next_p = &p;
       break;

@@ -17,28 +17,28 @@ void* run_core(void* arg) {
   while (true) {
     auto process = cpu->get_process();
 
-    // cout << "Core: " << id << endl;
-    cout << "Process: " << process->get_pid() << endl;
-    // cout << "State: " << process->get_state() << endl;
-    cout << endl;
+    if (process.get_pid() == -1) {
+      continue;
+    }
 
-    pthread_mutex_lock(&process_mutex);
-    process->set_state(TERMINATED);
-    pthread_mutex_unlock(&process_mutex);
+    cout << "Core: " << id << endl;
+    cout << "Process: " << process.get_pid() << endl;
+    cout << endl;
   }
 
   pthread_exit(NULL);
 }
 
-Process* Cpu::get_process() {
+Process Cpu::get_process() {
   pthread_mutex_lock(&next_process_mutex);
-  pthread_cond_wait(&core_cond, &next_process_mutex);
 
-  Process* process = next_process;
+  if (next_process.empty()) {
+    pthread_mutex_unlock(&next_process_mutex);
+    return Process(-1, -1, TERMINATED);
+  }
 
-  next_process = nullptr;
-
-  cout << next_process << endl;
+  Process process = next_process.front();
+  next_process.pop();
 
   pthread_mutex_unlock(&next_process_mutex);
 

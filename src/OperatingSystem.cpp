@@ -28,21 +28,25 @@ void *run_os(void *arg) {
   while (true) {
     if (!os->processes.size()) continue;
 
-    Process *next = os->scheduler.get_next_process(os->processes);
-
-    if (next == nullptr) continue;
-
     pthread_mutex_lock(&next_process_mutex);
 
-    if (next_process == nullptr) {
-      next_process = next;
+    int next_pid = os->scheduler.get_next_process_pid();
 
-      pthread_mutex_lock(&process_mutex);
-      next->set_state(RUNNING);
-      pthread_mutex_unlock(&process_mutex);
-
-      pthread_cond_signal(&core_cond);
+    if (next_pid == -1) {
+      pthread_mutex_unlock(&next_process_mutex);
+      continue;
     }
+
+    Process *next_p = nullptr;
+
+    for (auto &p : os->processes) {
+      if (p.get_pid() != next_pid) continue;
+
+      next_p = &p;
+      break;
+    }
+
+    next_process.push(*next_p);
 
     pthread_mutex_unlock(&next_process_mutex);
   }

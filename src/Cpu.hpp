@@ -15,7 +15,7 @@ class Cpu {
 
   int id;
 
-  Process* get_process();
+  Process get_process();
 };
 
 void *run_core(void *arg);

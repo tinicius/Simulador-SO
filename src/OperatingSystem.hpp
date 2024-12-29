@@ -11,7 +11,7 @@
 
 using namespace std;
 
-#define CORES_COUNT 1
+#define CORES_COUNT 4
 
 class OperatingSystem {
  private:

@@ -3,14 +3,15 @@
 
 #include <pthread.h>
 
+#include <queue>
+
 #include "Process.hpp"
+
+using namespace std;
 
 #define endl '\n'
 
-extern Process* next_process;
+extern queue<Process> next_process;
 extern pthread_mutex_t next_process_mutex;
-extern pthread_cond_t core_cond;
-
-extern pthread_mutex_t process_mutex;
 
 #endif

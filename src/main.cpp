@@ -5,6 +5,8 @@
 int main() {
   Scheduler scheduler;
 
+  for (int i = 0; i < 10; i++) scheduler.add_running(i);
+
   OperatingSystem so(scheduler);
   so.boot();
 

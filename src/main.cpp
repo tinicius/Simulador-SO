@@ -6,13 +6,24 @@
 #include "Ram.hpp"
 #include "entities.hpp"
 
+#define PROGRAMS_COUNT 1
+
 int main() {
   // BOOT
 
   // Buscando programas do disco
-  vector<vector<string>> programs = {{"LOAD 1 2", "LOAD 1 2", "LOAD 1 2"},
-                                     {"LOAD 1 2", "LOAD 1 2", "LOAD 1 2"},
-                                     {"LOAD 1 2", "LOAD 1 2", "LOAD 1 2"}};
+  vector<vector<string>> programs;
+
+  for (int i = 0; i < PROGRAMS_COUNT; i++) {
+    ifstream codigo("./dataset/codigo" + to_string(i + 1) + ".txt");
+
+    vector<string> program;
+    string temp;
+
+    while (getline(codigo, temp)) program.push_back(temp);
+
+    programs.push_back(program);
+  }
 
   // Inicializando RAM
   Ram ram;
@@ -34,7 +45,11 @@ int main() {
     pcb.pid = i;
     pcb.priority = 1;
     pcb.code_address = i;
+    pcb.code_size = program.size();
     pcb.PC = 0;
+
+    // Inserindo PCB na RAM
+    ram.insert_PCB(pcb);
 
     // Criando Processos
     Process p;

@@ -1,6 +1,8 @@
 #include "Ram.hpp"
 
-Ram::Ram() {}
+Ram::Ram() {
+  this->free_space.resize(32, 0);
+}
 
 void Ram::insert_code(vector<string> code) { this->codes.push_back(code); }
 
@@ -27,4 +29,22 @@ ProcessControlBlock Ram::get_PCB(int pcb_address) {
   }
 
   return PCBs[pcb_address];
+}
+
+int Ram::get_value(int address) {
+  if (address < 0 || address >= 32) {
+    cout << "Invalid address in free space" << endl;
+    exit(1);
+  }
+
+  return free_space[address];
+}
+
+void Ram::set_value(int address, int value) {
+  if (address < 0 || address >= 32) {
+    cout << "Invalid address in free space" << endl;
+    exit(1);
+  }
+
+  this->free_space[address] = value;
 }

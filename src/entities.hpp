@@ -15,6 +15,7 @@ typedef struct ProcessControlBlock {
 
   // Memory
   int code_address;
+  int code_size;
 
   // Registers
   int PC;

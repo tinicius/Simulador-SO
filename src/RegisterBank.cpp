@@ -19,7 +19,7 @@ void RegisterBank::set_clean(int address) {
 }
 
 void RegisterBank::print() {
-  for (int i = 0; i < this->registers.size(); i++) {
+  for (int i = 0; i < (int) this->registers.size(); i++) {
     cout << "0x" << i << " " << this->get_value(i) << endl;
   }
 }

@@ -12,6 +12,8 @@
 
 using namespace std;
 
+#define QUANTUM 10  // Quantum em ciclos de clock
+
 class Cpu {
  private:
   string active_instruction;
@@ -23,7 +25,7 @@ class Cpu {
   int write_value;
   int op;
 
-    vector<string> split_instruction(string instruction);
+  vector<string> split_instruction(string instruction);
   int get_register(int address);
   void set_register(int address, int value);
 

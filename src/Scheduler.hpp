@@ -24,6 +24,8 @@ class Scheduler {
   int get_next_process_pid();
 
   void add_running(int pid);
+
+  int get_running_size() { return this->running.size(); }
 };
 
 #endif

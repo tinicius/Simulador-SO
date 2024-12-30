@@ -10,7 +10,7 @@
 
 using namespace std;
 
-#define CORES_COUNT 1
+#define CORES_COUNT 2
 
 class OperatingSystem {
  private:
@@ -25,6 +25,7 @@ class OperatingSystem {
   Scheduler* scheduler;
 
   void insert_process(Process process);
+
 };
 
 void *run_os(void *arg);

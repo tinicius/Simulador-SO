@@ -20,7 +20,9 @@ class Ram {
   Ram();
 
   void insert_code(vector<string> code);
+
   void insert_PCB(ProcessControlBlock PCB);
+  void update_PCB(int pcb_address, ProcessControlBlock PCB);
 
   string get_instruction(int code_address, int PC);
 

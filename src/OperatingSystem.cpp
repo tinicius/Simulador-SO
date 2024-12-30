@@ -1,6 +1,6 @@
 #include "OperatingSystem.hpp"
 
-OperatingSystem::OperatingSystem(Scheduler* scheduler, Ram *ram) {
+OperatingSystem::OperatingSystem(Scheduler *scheduler, Ram *ram) {
   this->scheduler = scheduler;
   this->ram = ram;
 
@@ -24,7 +24,24 @@ void *run_os(void *arg) {
   OperatingSystem *os = (OperatingSystem *)arg;
 
   while (true) {
-    if (!os->processes.size()) continue;
+    // Adicionando novos processos prontos
+    pthread_mutex_lock(&ready_processes_mutex);
+
+    while (ready_processes.size()) {
+      auto p = ready_processes.front();
+      ready_processes.pop();
+      os->scheduler->add_running(p.pid);
+    }
+
+    pthread_mutex_unlock(&ready_processes_mutex);
+
+    // Verificando se há processos prontos
+    pthread_mutex_lock(&running_mutex);
+    if (os->scheduler->get_running_size() == 0) {
+      pthread_mutex_unlock(&running_mutex);
+      continue;
+    }
+    pthread_mutex_unlock(&running_mutex);
 
     pthread_mutex_lock(&next_process_mutex);
 

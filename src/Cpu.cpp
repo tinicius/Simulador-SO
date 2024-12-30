@@ -37,6 +37,8 @@ void* run_core(void* arg) {
 
     if (process.pid == -1) continue;
 
+    int quantum = 0;
+
     // Buscar PCB na RAM
     cpu->actual_pcb = cpu->ram->get_PCB(process.pcb_address);
 
@@ -47,14 +49,29 @@ void* run_core(void* arg) {
     cout << "Process: " << process.pid << endl;
     cout << endl;
 
-    while(cpu->InstructionFetch()) {
+    while (cpu->InstructionFetch()) {
       cpu->InstructionDecode();
       cpu->Execute();
       cpu->MemoryAccess();
       cpu->WriteBack();
-    }
 
-    cout << "Process " << process.pid << " finished" << endl;
+      quantum += 5;
+
+      if (cpu->actual_pcb.PC >= cpu->actual_pcb.code_size) {
+        cout << "Process " << process.pid << " finished" << endl;
+        break;
+      }
+
+      if (quantum == QUANTUM) {
+        pthread_mutex_lock(&ready_processes_mutex);
+        ready_processes.push(process);
+        pthread_mutex_unlock(&ready_processes_mutex);
+
+        cpu->ram->update_PCB(process.pcb_address, cpu->actual_pcb);
+
+        break;
+      }
+    }
   }
 
   pthread_exit(NULL);

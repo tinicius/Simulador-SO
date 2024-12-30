@@ -48,6 +48,12 @@ int main() {
     pcb.code_address = i;
     pcb.code_size = program.size();
     pcb.PC = 0;
+    pcb.state = NEW;
+    pcb.quantum_remaining = QUANTUM;
+    pcb.waiting_time = 0;
+    pcb.cpu_time = 0;
+    pcb.data_address = i;
+    pcb.data_size = 0;
 
     // Inserindo PCB na RAM
     ram.insert_PCB(pcb);

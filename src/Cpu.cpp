@@ -56,23 +56,33 @@ void* run_core(void* arg) {
       cpu->WriteBack();
 
       quantum += 5;
+    cpu->actual_pcb.quantum_remaining -= 5;
+    cpu->actual_pcb.cpu_time += 5;
 
-      if (cpu->actual_pcb.PC >= cpu->actual_pcb.code_size) {
-        cout << "Process " << process.pid << " finished" << endl;
+    // Verifica se quantum expirou
+    if (cpu->actual_pcb.quantum_remaining <= 0) {
+        // Salva contexto atual no PCB
+        cpu->actual_pcb.PC = cpu->PC;
+        cpu->ram->update_PCB(process.pcb_address, cpu->actual_pcb);
 
-        cout << cpu->ram->get_value(16) << endl;
-        break;
-      }
-
-      if (quantum == QUANTUM) {
+        // Muda estado para READY
+        process.state = READY;
+        
+        // Adiciona processo na fila de prontos
         pthread_mutex_lock(&ready_processes_mutex);
         ready_processes.push(process);
         pthread_mutex_unlock(&ready_processes_mutex);
 
-        cpu->ram->update_PCB(process.pcb_address, cpu->actual_pcb);
-
+        // Força troca de contexto
         break;
-      }
+    }
+
+    // Verifica fim do processo
+    if (cpu->actual_pcb.PC >= cpu->actual_pcb.code_size) {
+        cout << "Process " << process.pid << " finished" << endl;
+        cout << cpu->ram->get_value(16) << endl;
+        break;
+    }
     }
   }
 

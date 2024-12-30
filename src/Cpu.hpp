@@ -12,7 +12,7 @@
 
 using namespace std;
 
-#define QUANTUM 10  // Quantum em ciclos de clock
+#define QUANTUM 200  // Quantum em ciclos de clock
 
 class Cpu {
  private:

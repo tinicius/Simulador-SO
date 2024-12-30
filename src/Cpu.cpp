@@ -59,6 +59,8 @@ void* run_core(void* arg) {
 
       if (cpu->actual_pcb.PC >= cpu->actual_pcb.code_size) {
         cout << "Process " << process.pid << " finished" << endl;
+
+        cout << cpu->ram->get_value(16) << endl;
         break;
       }
 
@@ -185,17 +187,20 @@ void Cpu::Execute()  // Unidade de controle
     case BNE: {
       if (get_register(get_register(2)) != get_register(get_register(1))) {
         PC = get_register(3) - 1;
+        this->actual_pcb.PC = PC;
       }
       break;
     }
     case BEQ: {
       if (get_register(get_register(2)) == get_register(get_register(1))) {
         PC = get_register(3) - 1;
+        this->actual_pcb.PC = PC;
       }
       break;
     }
     case J: {
       PC = get_register(1) - 1;
+      this->actual_pcb.PC = PC;
       break;
     }
   }

@@ -6,7 +6,7 @@
 #include "Ram.hpp"
 #include "entities.hpp"
 
-#define PROGRAMS_COUNT 2
+#define PROGRAMS_COUNT 1
 #define CORES_COUNT 2
 
 int main() {

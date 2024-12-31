@@ -4,26 +4,30 @@
 #include <iostream>
 #include <map>
 #include <sstream>
-
+#include "Cache.hpp"
 #include "Ram.hpp"
 #include "RegisterBank.hpp"
 #include "entities.hpp"
 #include "globals.hpp"
 
+#include "MemoryLogger.hpp"
+
 using namespace std;
 
-#define QUANTUM 200  // Quantum em ciclos de clock
+
 
 class Cpu {
  private:
-  string active_instruction;
-
-  RegisterBank register_bank;
-
-  // Registradores especiais
-  bool write_data;
-  int write_value;
-  int op;
+  private:
+    int id;          // Move id to private and first
+    Cache* cache;
+    Ram* ram;
+    MemoryLogger* logger;
+    string active_instruction;
+    RegisterBank register_bank;
+    bool write_data;
+    int write_value;
+    int op;
 
   vector<string> split_instruction(string instruction);
   int get_register(int address);
@@ -32,31 +36,29 @@ class Cpu {
   int ula(int op1, int op2, char oper);
 
  public:
-  Cpu(int id, Ram* ram) {
-    this->id = id;
-    this->ram = ram;
-
-    this->write_data = false;
-  }
-
-  int id;
-
-  Ram* ram;
 
   ProcessControlBlock actual_pcb;
-
-  Process get_process();
-
-  // Registradores especiais
+  // Program Counter - Registrador especial
   int PC;
+  Cpu(int id, Ram* ram, Cache* cache) 
+      : id(id),
+        cache(cache),
+        ram(ram),
+        logger(MemoryLogger::getInstance(ram, cache)),
+        write_data(false) {}
+    
+    // Add getter for id
+    int get_id() const { return id; }
+    Ram* get_ram() { return ram; }
 
-  // TODO: Criar em uma classe separada
-  // Pipelne MIPS
-  bool InstructionFetch();
-  void InstructionDecode();
-  void Execute();
-  void MemoryAccess();
-  void WriteBack();
+    Process get_process();
+
+    // Pipeline MIPS
+    bool InstructionFetch();
+    void InstructionDecode();
+    void Execute();
+    void MemoryAccess();
+    void WriteBack();
 };
 
 void* run_core(void* arg);

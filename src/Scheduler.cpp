@@ -1,5 +1,7 @@
 #include "Scheduler.hpp"
 
+using namespace std;
+
 pthread_mutex_t running_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 Scheduler::Scheduler() {}
@@ -27,4 +29,43 @@ void Scheduler::add_running(int pid) {
   pthread_mutex_lock(&running_mutex);
   this->running.push_back(pid);
   pthread_mutex_unlock(&running_mutex);
+}
+
+void Scheduler::block_process(int pid) {
+    pthread_mutex_lock(&running_mutex);
+    
+    // Remove from running
+    auto it = find(running.begin(), running.end(), pid);
+    if (it != running.end()) {
+        running.erase(it);
+        blocked.push_back(pid);
+    }
+    
+    pthread_mutex_unlock(&running_mutex);
+}
+
+void Scheduler::unblock_process(int pid) {
+    pthread_mutex_lock(&running_mutex);
+    
+    // Move from blocked to ready
+    auto it = find(blocked.begin(), blocked.end(), pid);
+    if (it != blocked.end()) {
+        blocked.erase(it);
+        ready.push_back(pid);
+    }
+    
+    pthread_mutex_unlock(&running_mutex);
+}
+
+void Scheduler::terminate_process(int pid) {
+    pthread_mutex_lock(&running_mutex);
+    
+    // Move to terminated
+    auto it = find(running.begin(), running.end(), pid);
+    if (it != running.end()) {
+        running.erase(it);
+        terminated.push_back(pid);
+    }
+    
+    pthread_mutex_unlock(&running_mutex);
 }

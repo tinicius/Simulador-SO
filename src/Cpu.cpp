@@ -30,7 +30,7 @@ void* run_core(void* arg) {
     pthread_exit(NULL);
   }
 
-  int id = cpu->id;
+  int id = cpu->get_id();
 
   while (true) {
     auto process = cpu->get_process();
@@ -40,7 +40,7 @@ void* run_core(void* arg) {
     int quantum = 0;
 
     // Buscar PCB na RAM
-    cpu->actual_pcb = cpu->ram->get_PCB(process.pcb_address);
+    cpu->actual_pcb = cpu->get_ram()->get_PCB(process.pcb_address);
 
     // Atualizando registradores
     cpu->PC = cpu->actual_pcb.PC;
@@ -56,20 +56,29 @@ void* run_core(void* arg) {
       cpu->WriteBack();
 
       quantum += 5;
+      cpu->actual_pcb.timestamp += 5;
+      cpu->actual_pcb.cpu_time += 5;
 
+      // Verifica fim do processo
       if (cpu->actual_pcb.PC >= cpu->actual_pcb.code_size) {
         cout << "Process " << process.pid << " finished" << endl;
-
-        cout << cpu->ram->get_value(16) << endl;
+        cpu->get_ram()->update_PCB(process.pcb_address, cpu->actual_pcb);
         break;
       }
 
-      if (quantum == QUANTUM) {
+      // Verifica se quantum expirou
+      if (quantum >= QUANTUM) {
+        // Salva contexto atual no PCB
+        cpu->actual_pcb.PC = cpu->PC;
+        cpu->get_ram()->update_PCB(process.pcb_address, cpu->actual_pcb);
+
+        // Muda estado para READY
+        process.state = READY;
+
+        // Adiciona processo na fila de prontos
         pthread_mutex_lock(&ready_processes_mutex);
         ready_processes.push(process);
         pthread_mutex_unlock(&ready_processes_mutex);
-
-        cpu->ram->update_PCB(process.pcb_address, cpu->actual_pcb);
 
         break;
       }
@@ -209,9 +218,10 @@ void Cpu::Execute()  // Unidade de controle
 void Cpu::MemoryAccess() {
   switch (op) {
     case LOAD: {
-      write_value = ram->get_value(get_register(2));
+      int address = get_register(2);
+      write_value = cache->read(address);
+      logger->log_memory_operation("LOAD", address, write_value);
       write_data = true;
-
       break;
     }
     case ILOAD: {
@@ -221,9 +231,10 @@ void Cpu::MemoryAccess() {
       break;
     }
     case STORE: {
-      ram->set_value(get_register(2), get_register(get_register(1)));
-
-      // ram->print(active_instruction);
+      int address = get_register(2);
+      int value = get_register(get_register(1));
+      cache->write(address, value);
+      logger->log_memory_operation("STORE", address, value);
       break;
     }
   }

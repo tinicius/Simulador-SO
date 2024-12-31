@@ -4,12 +4,13 @@
 #include <iostream>
 #include <map>
 #include <sstream>
-
+#include "Cache.hpp"
 #include "Ram.hpp"
 #include "RegisterBank.hpp"
 #include "entities.hpp"
 #include "globals.hpp"
-#include "Cache.hpp"
+
+#include "MemoryLogger.hpp"
 
 using namespace std;
 
@@ -21,6 +22,7 @@ class Cpu {
     int id;          // Move id to private and first
     Cache* cache;
     Ram* ram;
+    MemoryLogger* logger;
     string active_instruction;
     RegisterBank register_bank;
     bool write_data;
@@ -42,6 +44,7 @@ class Cpu {
       : id(id),
         cache(cache),
         ram(ram),
+        logger(MemoryLogger::getInstance(ram, cache)),
         write_data(false) {}
     
     // Add getter for id

@@ -80,7 +80,14 @@ int Cache::get_replacement_index() {
 }
 
 bool Cache::is_hit(int address) {
+    cout << "Cache access - Address: " << address << endl;
     int tag = get_tag(address);
     int index = get_index(address);
-    return blocks[index].valid && blocks[index].tag == tag;
+    bool hit = blocks[index].valid && blocks[index].tag == tag;
+    cout << "Cache " << (hit ? "HIT" : "MISS") << endl;
+    return hit;
+}
+
+CacheBlock Cache::get_block(int index) {
+    return blocks[index];  // Verificar se está retornando corretamente
 }

@@ -4,6 +4,7 @@ OperatingSystem::OperatingSystem(Scheduler *scheduler, Ram *ram) {
   this->scheduler = scheduler;
   this->ram = ram;
   this->cache = new Cache(ram);
+  global_cache = this->cache;
   pthread_t t_core[CORES_COUNT];
 
   for (int i = 0; i < CORES_COUNT; i++) {

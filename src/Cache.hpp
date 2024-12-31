@@ -29,7 +29,7 @@ private:
 public:
     Cache(Ram* ram);
     ~Cache();
-    
+    CacheBlock get_block(int index);
     int read(int address);
     void write(int address, int value);
     bool is_hit(int address);

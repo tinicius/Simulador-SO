@@ -4,9 +4,10 @@
 #include <pthread.h>
 
 #include <vector>
-
+#include "Cache.hpp"  
 #include "Cpu.hpp"
 #include "Scheduler.hpp"
+#include "globals.hpp" 
 
 using namespace std;
 

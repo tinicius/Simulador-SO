@@ -219,9 +219,10 @@ void Cpu::Execute()  // Unidade de controle
 void Cpu::MemoryAccess() {
   switch (op) {
     case LOAD: {
-      write_value = cache->read(get_register(2));
+      int address = get_register(2);
+      write_value = cache->read(address);
+      logger->log_memory_operation("LOAD", address, write_value);
       write_data = true;
-
       break;
     }
     case ILOAD: {
@@ -231,7 +232,10 @@ void Cpu::MemoryAccess() {
       break;
     }
     case STORE: {
-      cache->write(get_register(2), get_register(get_register(1)));  
+      int address = get_register(2);
+      int value = get_register(get_register(1));
+      cache->write(address, value);
+      logger->log_memory_operation("STORE", address, value);
       break;
     }
   }

@@ -1,36 +1,34 @@
+```markdown
 # Simulador de Sistema Operacional - Documentação de Implementação
 
 ## 🔄 Fases Implementadas
 
-### **Fase 1: Gerenciamento de Processos**
+### 1. Gerenciamento de Processos
 
 #### 1.1 Expansão do PCB (Process Control Block)
+
 **Melhorias Implementadas:**
-- Adição de estados do processo:
-  - `NEW`, `READY`, `RUNNING`, `BLOCKED`, `TERMINATED`
+
+- Adição de estados do processo: NEW, READY, RUNNING, BLOCKED, TERMINATED
 - Implementação de controle de quantum para preempção.
-- Contadores de tempo:
-  - `waiting_time`, `cpu_time`
+- Contadores de tempo: waiting_time, cpu_time
 - Gerenciamento de recursos alocados.
 - Separação entre dados e código na memória.
 
 #### 1.2 Gerenciamento de Estados de Processo
+
 **Funcionalidades Implementadas:**
-- Transições de estado:
-  - `NEW → READY → RUNNING → TERMINATED`
+
+- Transições de estado: NEW → READY → RUNNING → TERMINATED
 - Preempção por quantum.
 - Escalonamento FCFS (First-Come-First-Served).
 - Sincronização entre cores usando mutex.
 - Gerenciamento de filas de processos.
 
----
+### 2. Sistema de Memória (Cache)
 
-### **Fase 2: Sistema de Memória**
+#### 2.1 Estrutura da Cache
 
-#### 2.1 Cache
-### Implementação da Cache - Detalhamento Técnico
-
-#### 1. Estrutura da Cache
 ```cpp
 // Definição do bloco de cache
 struct CacheBlock {
@@ -49,9 +47,10 @@ private:
 };
 ```
 
-#### 2. Integração com Sistema
+#### 2.2 Integração com o Sistema
 
-##### 2.1 Modificações na CPU
+**Modificações na CPU:**
+
 ```cpp
 class Cpu {
 private:
@@ -65,7 +64,8 @@ public:
 };
 ```
 
-##### 2.2 Modificações no OperatingSystem
+**Modificações no OperatingSystem:**
+
 ```cpp
 class OperatingSystem {
 private:
@@ -83,9 +83,10 @@ public:
 };
 ```
 
-#### 3. Operações da Cache
+#### 2.3 Operações Fundamentais
 
-##### 3.1 Leitura (Read)
+**Leitura (Read):**
+
 ```cpp
 int Cache::read(int address) {
     pthread_mutex_lock(&cache_mutex);
@@ -104,7 +105,8 @@ int Cache::read(int address) {
 }
 ```
 
-##### 3.2 Escrita (Write)
+**Escrita (Write):**
+
 ```cpp
 void Cache::write(int address, int value) {
     pthread_mutex_lock(&cache_mutex);
@@ -119,90 +121,124 @@ void Cache::write(int address, int value) {
 }
 ```
 
-#### 4. Fluxo de Dados
-**CPU → Cache → RAM:**
+### 3. Memory Logger
 
-- CPU solicita leitura/escrita
-- Cache verifica hit/miss
-- Se miss, acessa RAM
-- Se write, atualiza RAM (write-through)
+#### 3.1 Objetivo
 
-**Sincronização:**
+O MemoryLogger foi implementado para registrar as operações de memória e o estado final da RAM e da Cache durante a execução do simulador. Isso permite acompanhar as alterações na memória e depurar o comportamento do sistema.
 
-- Mutex protege acessos concorrentes
-- FIFO gerencia substituição de blocos
-- Write-through mantém consistência
+#### 3.2 Funcionamento
 
-#### 5. Comunicação com Pipeline MIPS
+**Singleton Pattern:**
+
+O MemoryLogger utiliza o padrão Singleton, garantindo uma única instância durante a execução do sistema.
+
 ```cpp
-void Cpu::MemoryAccess() {
-    switch (op) {
-        case LOAD: {
-            write_value = cache->read(get_register(2));
-            break;
-        }
-        case STORE: {
-            cache->write(get_register(2), get_register(get_register(1)));
-            break;
-        }
+MemoryLogger* MemoryLogger::getInstance(Ram* ram, Cache* cache) {
+    if (instance == nullptr) {
+        instance = new MemoryLogger();
+        instance->ram = ram;
+        instance->cache = cache;
+        instance->open_log_file();  
     }
+    return instance;
 }
 ```
 
-#### 6. Melhorias Implementadas
+**Registro de Operações:**
 
-**Consistência de Memória:**
+As operações de memória, como LOAD e STORE, são logadas durante a execução do simulador.
 
-- Write-through para debugging
-- Sincronização entre cores
-- Proteção de acessos concorrentes
+```cpp
+void MemoryLogger::log_memory_operation(const string& op, int address, int value) {
+    log_file << "\n[Memory Operation] " 
+             << "Time: " << time(nullptr) << endl
+             << "Operation: " << op << endl
+             << "Address: " << address << endl
+             << "Value: " << value << endl;
+}
+```
 
-**Performance:**
+**Estado Final da Memória:**
 
-- Cache de 16 blocos
-- Política FIFO
-- Hit/miss tracking
+Ao término da execução, o logger registra o estado completo da RAM e da Cache.
 
-**Integração:**
+```cpp
+void MemoryLogger::log_final_state() {
+    if (!ram || !cache || !log_file.is_open()) {
+        return;
+    }
 
-- Transparente para CPU
-- Compartilhada entre cores
-- Consistente com RAM
+    log_file << "\n=== Final Memory State ===" << endl;
+    log_file << "RAM Contents:" << endl;
+    
+    // Print RAM contents
+    for (int i = 0; i < 32; i++) {
+        log_file << "Address " << setw(2) << i 
+                << ": " << setw(5) << ram->get_value(i) << endl;
+    }
+    
+    // Print Cache contents
+    log_file << "\nCache Contents:" << endl;
+    for (int i = 0; i < CACHE_SIZE; i++) {
+        CacheBlock block = cache->get_block(i);
+        if (cache && block.valid) {
+            log_file << "Block " << setw(2) << i 
+                    << ": Tag=" << block.tag 
+                    << " Data=" << block.data 
+                    << " Dirty=" << block.dirty << endl;
+        }
+    }
+    
+    log_file << "\n=== End of Memory State ===" << endl;
+    log_file.flush();
+}
+```
+
+#### 3.3 Integração com o Simulador
+
+- **Inicialização:** O MemoryLogger é iniciado junto com o simulador.
+- **Operações de Memória:** Cada operação executada pela CPU é registrada.
+- **Estado Final:** O estado completo da memória é salvo ao final da execução ou em casos de interrupção.
+
+```cpp
+// Inicialização no main.cpp
+auto logger = MemoryLogger::getInstance(&ram, &cache);
+logger->log_memory_operation("INIT", 0, 0);
+
+// Registro no signal handler
+void signal_handler(int signum) {
+    if (global_ram && global_cache) {
+        auto logger = MemoryLogger::getInstance(global_ram, global_cache);
+        logger->log_final_state();
+        logger->close_log_file();
+    }
+    exit(signum);
+}
+```
 
 ## 🔧 Melhorias Técnicas
 
-### **1. Sincronização**
-- Implementação de mutex para recursos compartilhados.
-- Proteção de regiões críticas.
-- Controle de acesso à cache.
-- Gerenciamento de filas de processos.
+1. **Sincronização**
+   - Implementação de mutex para proteger acessos à cache e memória compartilhada.
+   - Redução significativa de erros em ambientes multicore.
 
-### **2. Multicore**
-- Suporte a múltiplos cores (2 cores).
-- Escalonamento entre cores.
-- Cache compartilhada.
-- Preempção independente por core.
+2. **Execução Multicore**
+   - Cache compartilhada entre os núcleos.
+   - Escalonamento independente e preempção com controle por quantum.
 
-### **3. Pipeline MIPS**
-- Cinco estágios:
-  - `IF`, `ID`, `EX`, `MEM`, `WB`.
-- Integração com cache na fase MEM.
-- Controle de hazards básico.
-- Suporte a instruções básicas.
-
----
+3. **Integração com Pipeline MIPS**
+   - Controle básico de hazards e integração em cinco estágios: IF, ID, EX, MEM, WB.
 
 ## 📊 Estado Atual
-- Sistema base funcionando.
-- Execução multicore operacional.
-- Cache implementada e integrada.
-- Gerenciamento de processos básico completo.
-- Preempção por quantum funcionando.
 
----
+- Suporte a múltiplos núcleos.
+- Cache implementada e funcionando.
+- Gerenciamento de processos básico operacional.
+- Registro detalhado de operações com o MemoryLogger.
 
 ## 🔜 Próximos Passos
-1. Implementação de memória secundária (Fase 2.2).
-2. Otimização do cálculo de endereços na cache.
-3. Implementação de mais tipos de hazards.
-4. Melhorias no escalonamento.
+
+-  memória secundária?
+- testar a cache
+- tratar as interrupuções I/O

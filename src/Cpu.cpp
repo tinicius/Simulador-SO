@@ -26,11 +26,11 @@ void* run_core(void* arg) {
   Cpu* cpu = (Cpu*)arg;
 
   if (cpu == nullptr) {
-    cout << "Cpu is null" << endl;
-    pthread_exit(NULL);
+      cout << "Cpu is null" << endl;
+      pthread_exit(NULL);
   }
 
-  int id = cpu->id;
+  int id = cpu->get_id();
 
   while (true) {
     auto process = cpu->get_process();
@@ -40,7 +40,7 @@ void* run_core(void* arg) {
     int quantum = 0;
 
     // Buscar PCB na RAM
-    cpu->actual_pcb = cpu->ram->get_PCB(process.pcb_address);
+    cpu->actual_pcb = cpu->get_ram()->get_PCB(process.pcb_address);
 
     // Atualizando registradores
     cpu->PC = cpu->actual_pcb.PC;
@@ -56,33 +56,33 @@ void* run_core(void* arg) {
       cpu->WriteBack();
 
       quantum += 5;
-    cpu->actual_pcb.quantum_remaining -= 5;
-    cpu->actual_pcb.cpu_time += 5;
+      cpu->actual_pcb.quantum_remaining -= 5;
+      cpu->actual_pcb.cpu_time += 5;
 
-    // Verifica se quantum expirou
-    if (cpu->actual_pcb.quantum_remaining <= 0) {
-        // Salva contexto atual no PCB
-        cpu->actual_pcb.PC = cpu->PC;
-        cpu->ram->update_PCB(process.pcb_address, cpu->actual_pcb);
+      // Verifica se quantum expirou
+      if (cpu->actual_pcb.quantum_remaining <= 0) {
+          // Salva contexto atual no PCB
+          cpu->actual_pcb.PC = cpu->PC;
+          cpu->get_ram()->update_PCB(process.pcb_address, cpu->actual_pcb);
 
-        // Muda estado para READY
-        process.state = READY;
-        
-        // Adiciona processo na fila de prontos
-        pthread_mutex_lock(&ready_processes_mutex);
-        ready_processes.push(process);
-        pthread_mutex_unlock(&ready_processes_mutex);
+          // Muda estado para READY
+          process.state = READY;
+          
+          // Adiciona processo na fila de prontos
+          pthread_mutex_lock(&ready_processes_mutex);
+          ready_processes.push(process);
+          pthread_mutex_unlock(&ready_processes_mutex);
 
-        // Força troca de contexto
-        break;
-    }
+          // Força troca de contexto
+          break;
+      }
 
-    // Verifica fim do processo
-    if (cpu->actual_pcb.PC >= cpu->actual_pcb.code_size) {
-        cout << "Process " << process.pid << " finished" << endl;
-        cout << cpu->ram->get_value(16) << endl;
-        break;
-    }
+      // Verifica fim do processo
+      if (cpu->actual_pcb.PC >= cpu->actual_pcb.code_size) {
+          cout << "Process " << process.pid << " finished" << endl;
+          cout << cpu->get_ram()->get_value(16) << endl;
+          break;
+      }
     }
   }
 
@@ -219,7 +219,7 @@ void Cpu::Execute()  // Unidade de controle
 void Cpu::MemoryAccess() {
   switch (op) {
     case LOAD: {
-      write_value = ram->get_value(get_register(2));
+      write_value = cache->read(get_register(2));
       write_data = true;
 
       break;
@@ -231,9 +231,7 @@ void Cpu::MemoryAccess() {
       break;
     }
     case STORE: {
-      ram->set_value(get_register(2), get_register(get_register(1)));
-
-      // ram->print(active_instruction);
+      cache->write(get_register(2), get_register(get_register(1)));  
       break;
     }
   }

@@ -5,6 +5,8 @@ using namespace std;
 
 #include <vector>
 
+#define REGISTERS_SIZE 32
+
 enum ProcessState {
   NEW,        // Processo acabou de ser criado
   READY,      // Processo pronto para executar
@@ -29,6 +31,7 @@ typedef struct ProcessControlBlock {
 
   // Registers
   int PC;
+  int registers[32];
 
   //
   ProcessState state = READY;

@@ -4,6 +4,8 @@
 #include <vector>
 #include <iostream>
 
+#include "globals.hpp"
+
 using namespace std;
 
 typedef struct Register {
@@ -13,7 +15,7 @@ typedef struct Register {
 
 class RegisterBank {
  private:
-  vector<Register> registers;
+  Register registers[REGISTERS_SIZE];
 
  public:
   RegisterBank();
@@ -22,6 +24,8 @@ class RegisterBank {
   void set_value(int address, int value);
   void set_dirty(int address);
   void set_clean(int address);
+
+  void set_registers(int registers[REGISTERS_SIZE]);
 
   void print();
 };

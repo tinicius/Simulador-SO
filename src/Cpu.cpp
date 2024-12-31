@@ -44,6 +44,7 @@ void* run_core(void* arg) {
 
     // Atualizando registradores
     cpu->PC = cpu->actual_pcb.PC;
+    cpu->set_registers(cpu->actual_pcb.registers);
 
     cout << "Core: " << id << endl;
     cout << "Process: " << process.pid << endl;
@@ -60,6 +61,11 @@ void* run_core(void* arg) {
       cpu->actual_pcb.cpu_time += 5;
 
       cpu->actual_pcb.PC = cpu->PC;
+      
+      // Atualizando registradores do PCB
+      for (int i = 0; i < REGISTERS_SIZE; i++) {
+        cpu->actual_pcb.registers[i] = cpu->get_register(i);
+      }
 
       // Verifica fim do processo
       if (cpu->actual_pcb.PC >= cpu->actual_pcb.code_size) {

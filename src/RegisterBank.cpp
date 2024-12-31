@@ -1,6 +1,6 @@
 #include "RegisterBank.hpp"
 
-RegisterBank::RegisterBank() { this->registers.resize(32); }
+RegisterBank::RegisterBank() {}
 
 int RegisterBank::get_value(int address) {
   return this->registers[address].value;
@@ -19,7 +19,13 @@ void RegisterBank::set_clean(int address) {
 }
 
 void RegisterBank::print() {
-  for (int i = 0; i < (int) this->registers.size(); i++) {
+  for (int i = 0; i < REGISTERS_SIZE; i++) {
     cout << "0x" << i << " " << this->get_value(i) << endl;
+  }
+}
+
+void RegisterBank::set_registers(int registers[REGISTERS_SIZE]) {
+  for (int i = 0; i < REGISTERS_SIZE; i++) {
+    this->registers[i].value = registers[i];
   }
 }

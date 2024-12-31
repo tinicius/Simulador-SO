@@ -14,6 +14,9 @@ using namespace std;
 
 #define QUANTUM 5  // Quantum em ciclos de clock
 
+#define PROGRAMS_COUNT 1
+#define CORES_COUNT 1
+
 extern queue<Process> next_process;
 extern pthread_mutex_t next_process_mutex;
 

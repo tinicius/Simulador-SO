@@ -59,6 +59,8 @@ void* run_core(void* arg) {
       cpu->actual_pcb.timestamp += 5;
       cpu->actual_pcb.cpu_time += 5;
 
+      cpu->actual_pcb.PC = cpu->PC;
+
       // Verifica fim do processo
       if (cpu->actual_pcb.PC >= cpu->actual_pcb.code_size) {
         cout << "Process " << process.pid << " finished" << endl;
@@ -68,8 +70,6 @@ void* run_core(void* arg) {
 
       // Verifica se quantum expirou
       if (quantum >= QUANTUM) {
-        // Salva contexto atual no PCB
-        cpu->actual_pcb.PC = cpu->PC;
         cpu->get_ram()->update_PCB(process.pcb_address, cpu->actual_pcb);
 
         // Muda estado para READY
@@ -108,12 +108,12 @@ Process Cpu::get_process() {
 }
 
 bool Cpu::InstructionFetch() {
-  if (actual_pcb.PC >= actual_pcb.code_size) return false;
+  if (this->PC >= actual_pcb.code_size) return false;
 
   this->active_instruction =
-      ram->get_instruction(actual_pcb.code_address, actual_pcb.PC);
+      ram->get_instruction(actual_pcb.code_address, this->PC);
 
-  actual_pcb.PC++;
+  this->PC++;
 
   return true;
 }
@@ -196,20 +196,17 @@ void Cpu::Execute()  // Unidade de controle
     case BNE: {
       if (get_register(get_register(2)) != get_register(get_register(1))) {
         PC = get_register(3) - 1;
-        this->actual_pcb.PC = PC;
       }
       break;
     }
     case BEQ: {
       if (get_register(get_register(2)) == get_register(get_register(1))) {
         PC = get_register(3) - 1;
-        this->actual_pcb.PC = PC;
       }
       break;
     }
     case J: {
       PC = get_register(1) - 1;
-      this->actual_pcb.PC = PC;
       break;
     }
   }

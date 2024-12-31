@@ -6,8 +6,6 @@
 #include "Ram.hpp"
 #include "entities.hpp"
 
-#define PROGRAMS_COUNT 1
-#define CORES_COUNT 2
 
 // Variáveis globais para o handler
 extern Ram* global_ram;

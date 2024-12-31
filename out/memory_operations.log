@@ -1,15 +1,10 @@
 
 === New Execution Session ===
 
-[Memory Operation] Time: 1735621753
+[Memory Operation] Time: 1735660705
 Operation: INIT
 Address: 0
 Value: 0
-
-[Memory Operation] Time: 1735621753
-Operation: STORE
-Address: 16
-Value: 15
 
 === Final Memory State ===
 RAM Contents:
@@ -29,7 +24,7 @@ Address 12:     0
 Address 13:     0
 Address 14:     0
 Address 15:     0
-Address 16:    15
+Address 16:     0
 Address 17:     0
 Address 18:     0
 Address 19:     0
@@ -49,3 +44,68 @@ Address 31:     0
 Cache Contents:
 
 === End of Memory State ===
+
+=== PCBs State ===
+PID: 0
+Priority: 1
+Code Address: 0
+Code Size: 4
+PC: 0
+State: 0
+Quantum Remaining: -241920
+Waiting Time: 0
+CPU Time: 241925
+Data Address: 0
+
+
+=== Final Memory State ===
+RAM Contents:
+Address  0:     0
+Address  1:     0
+Address  2:     0
+Address  3:     0
+Address  4:     0
+Address  5:     0
+Address  6:     0
+Address  7:     0
+Address  8:     0
+Address  9:     0
+Address 10:     0
+Address 11:     0
+Address 12:     0
+Address 13:     0
+Address 14:     0
+Address 15:     0
+Address 16:     0
+Address 17:     0
+Address 18:     0
+Address 19:     0
+Address 20:     0
+Address 21:     0
+Address 22:     0
+Address 23:     0
+Address 24:     0
+Address 25:     0
+Address 26:     0
+Address 27:     0
+Address 28:     0
+Address 29:     0
+Address 30:     0
+Address 31:     0
+
+Cache Contents:
+
+=== End of Memory State ===
+
+=== PCBs State ===
+PID: 0
+Priority: 1
+Code Address: 0
+Code Size: 4
+PC: 0
+State: 0
+Quantum Remaining: -241935
+Waiting Time: 0
+CPU Time: 241940
+Data Address: 0
+

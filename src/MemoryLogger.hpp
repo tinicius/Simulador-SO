@@ -25,6 +25,10 @@ public:
     void log_process_finished(int pid, int result);
     void open_log_file();
     void close_log_file();
-};
+
+    void log_pcbs_state();
+}
+
+;
 
 #endif

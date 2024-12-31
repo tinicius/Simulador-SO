@@ -26,8 +26,8 @@ void* run_core(void* arg) {
   Cpu* cpu = (Cpu*)arg;
 
   if (cpu == nullptr) {
-      cout << "Cpu is null" << endl;
-      pthread_exit(NULL);
+    cout << "Cpu is null" << endl;
+    pthread_exit(NULL);
   }
 
   int id = cpu->get_id();
@@ -56,32 +56,31 @@ void* run_core(void* arg) {
       cpu->WriteBack();
 
       quantum += 5;
-      cpu->actual_pcb.quantum_remaining -= 5;
+      cpu->actual_pcb.timestamp += 5;
       cpu->actual_pcb.cpu_time += 5;
-
-      // Verifica se quantum expirou
-      if (cpu->actual_pcb.quantum_remaining <= 0) {
-          // Salva contexto atual no PCB
-          cpu->actual_pcb.PC = cpu->PC;
-          cpu->get_ram()->update_PCB(process.pcb_address, cpu->actual_pcb);
-
-          // Muda estado para READY
-          process.state = READY;
-          
-          // Adiciona processo na fila de prontos
-          pthread_mutex_lock(&ready_processes_mutex);
-          ready_processes.push(process);
-          pthread_mutex_unlock(&ready_processes_mutex);
-
-          // Força troca de contexto
-          break;
-      }
 
       // Verifica fim do processo
       if (cpu->actual_pcb.PC >= cpu->actual_pcb.code_size) {
-          cout << "Process " << process.pid << " finished" << endl;
-          cout << cpu->get_ram()->get_value(16) << endl;
-          break;
+        cout << "Process " << process.pid << " finished" << endl;
+        cpu->get_ram()->update_PCB(process.pcb_address, cpu->actual_pcb);
+        break;
+      }
+
+      // Verifica se quantum expirou
+      if (quantum >= QUANTUM) {
+        // Salva contexto atual no PCB
+        cpu->actual_pcb.PC = cpu->PC;
+        cpu->get_ram()->update_PCB(process.pcb_address, cpu->actual_pcb);
+
+        // Muda estado para READY
+        process.state = READY;
+
+        // Adiciona processo na fila de prontos
+        pthread_mutex_lock(&ready_processes_mutex);
+        ready_processes.push(process);
+        pthread_mutex_unlock(&ready_processes_mutex);
+
+        break;
       }
     }
   }

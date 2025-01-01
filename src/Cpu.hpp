@@ -27,7 +27,7 @@ class Cpu {
   int write_value;
   int op;
 
-  ofstream* cpu_file;
+  ofstream cpu_file;
 
   vector<string> split_instruction(string instruction);
 
@@ -45,20 +45,9 @@ class Cpu {
         cache(cache),
         ram(ram),
         logger(MemoryLogger::getInstance(ram, cache)),
-        write_data(false) {
-    cpu_file = new ofstream();
-    if (cpu_file != nullptr)
-      cpu_file->open("./out/cpu_" + to_string(id) + ".log", ios::trunc);
-  }
+        write_data(false) {}
 
-  ~Cpu() {
-    if (cpu_file->is_open()) {
-      cpu_file->flush();
-      cpu_file->close();
-    }
-  }
-
-  void log(string message) { *cpu_file << message << endl; }
+  void log(const std::string& message) { (cpu_file) << message << endl; }
 
   // Add getter for id
   int get_id() const { return id; }
@@ -69,6 +58,16 @@ class Cpu {
   void set_registers(int registers[REGISTERS_SIZE]) {
     register_bank.set_registers(registers);
   }
+
+  void open_log_file() {
+    cpu_file.open("cpu" + to_string(id) + ".log");
+    if (!cpu_file.is_open()) {
+      cout << "Error opening file" << endl;
+      exit(1);
+    }
+  }
+
+  void close_log_file() { cpu_file.close(); }
 
   Process get_process();
 

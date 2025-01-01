@@ -19,7 +19,7 @@ void signal_handler(int signum) {
 
     logger->close_log_file();
 
-    print_process_states();
+    // print_process_states();
   }
   exit(signum);
 }

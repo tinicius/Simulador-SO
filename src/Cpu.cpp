@@ -25,8 +25,11 @@ void Cpu::set_register(int address, int value) {
 void* run_core(void* arg) {
   Cpu* cpu = (Cpu*)arg;
 
+  cpu->open_log_file();
+
   if (cpu == nullptr) {
     cout << "Cpu is null" << endl;
+    cpu->close_log_file();
     pthread_exit(NULL);
   }
 
@@ -35,6 +38,7 @@ void* run_core(void* arg) {
 
   if (process.pid == -1) {
     cpu->log("Core " + to_string(cpu->get_id()) + " is idle");
+    cpu->close_log_file();
     pthread_exit(NULL);
   }
 
@@ -90,6 +94,7 @@ void* run_core(void* arg) {
     }
   }
 
+  cpu->close_log_file();
   pthread_exit(NULL);
 }
 

@@ -1,6 +1,7 @@
 #ifndef CPU_HPP
 #define CPU_HPP
 
+#include <fstream>
 #include <iostream>
 #include <map>
 #include <sstream>
@@ -16,7 +17,6 @@ using namespace std;
 
 class Cpu {
  private:
- private:
   int id;  // Move id to private and first
   Cache* cache;
   Ram* ram;
@@ -26,6 +26,8 @@ class Cpu {
   bool write_data;
   int write_value;
   int op;
+
+  ofstream* cpu_file;
 
   vector<string> split_instruction(string instruction);
 
@@ -37,12 +39,26 @@ class Cpu {
   ProcessControlBlock actual_pcb;
   // Program Counter - Registrador especial
   int PC;
+
   Cpu(int id, Ram* ram, Cache* cache)
       : id(id),
         cache(cache),
         ram(ram),
         logger(MemoryLogger::getInstance(ram, cache)),
-        write_data(false) {}
+        write_data(false) {
+    cpu_file = new ofstream();
+    if (cpu_file != nullptr)
+      cpu_file->open("./out/cpu_" + to_string(id) + ".log", ios::trunc);
+  }
+
+  ~Cpu() {
+    if (cpu_file->is_open()) {
+      cpu_file->flush();
+      cpu_file->close();
+    }
+  }
+
+  void log(string message) { *cpu_file << message << endl; }
 
   // Add getter for id
   int get_id() const { return id; }

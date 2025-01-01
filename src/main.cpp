@@ -6,7 +6,6 @@
 #include "Ram.hpp"
 #include "entities.hpp"
 
-
 // Variáveis globais para o handler
 extern Ram* global_ram;
 extern Cache* global_cache;
@@ -19,6 +18,8 @@ void signal_handler(int signum) {
     logger->log_pcbs_state();
 
     logger->close_log_file();
+
+    print_process_states();
   }
   exit(signum);
 }
@@ -90,7 +91,7 @@ int main() {
   }
 
   pthread_t t_so;
-  pthread_create(&t_so, NULL, run_os, &so);
+  pthread_create(&t_so, NULL, run_clock_os, &so);
   pthread_join(t_so, NULL);
 
   return 0;

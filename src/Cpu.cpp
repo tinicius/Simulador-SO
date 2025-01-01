@@ -30,64 +30,63 @@ void* run_core(void* arg) {
     pthread_exit(NULL);
   }
 
-  int id = cpu->get_id();
+  // Buscar processo para executar
+  auto process = cpu->get_process();
 
-  while (true) {
-    auto process = cpu->get_process();
+  if (process.pid == -1) {
+    cpu->log("Core " + to_string(cpu->get_id()) + " is idle");
+    pthread_exit(NULL);
+  }
 
-    if (process.pid == -1) continue;
+  int quantum = 0;
 
-    int quantum = 0;
+  // Buscar PCB na RAM
+  cpu->actual_pcb = cpu->get_ram()->get_PCB(process.pcb_address);
 
-    // Buscar PCB na RAM
-    cpu->actual_pcb = cpu->get_ram()->get_PCB(process.pcb_address);
+  // Atualizando registradores
+  cpu->PC = cpu->actual_pcb.PC;
+  cpu->set_registers(cpu->actual_pcb.registers);
 
-    // Atualizando registradores
-    cpu->PC = cpu->actual_pcb.PC;
-    cpu->set_registers(cpu->actual_pcb.registers);
+  cpu->log("Core: " + to_string(cpu->get_id()) + " is running process " +
+           to_string(process.pid));
 
-    cout << "Core: " << id << endl;
-    cout << "Process: " << process.pid << endl;
-    cout << endl;
+  while (cpu->InstructionFetch()) {
+    cpu->InstructionDecode();
+    cpu->Execute();
+    cpu->MemoryAccess();
+    cpu->WriteBack();
 
-    while (cpu->InstructionFetch()) {
-      cpu->InstructionDecode();
-      cpu->Execute();
-      cpu->MemoryAccess();
-      cpu->WriteBack();
+    quantum += 5;
+    cpu->actual_pcb.timestamp += 5;
+    cpu->actual_pcb.cpu_time += 5;
 
-      quantum += 5;
-      cpu->actual_pcb.timestamp += 5;
-      cpu->actual_pcb.cpu_time += 5;
+    cpu->actual_pcb.PC = cpu->PC;
 
-      cpu->actual_pcb.PC = cpu->PC;
-      
-      // Atualizando registradores do PCB
-      for (int i = 0; i < REGISTERS_SIZE; i++) {
-        cpu->actual_pcb.registers[i] = cpu->get_register(i);
-      }
+    // Atualizando registradores do PCB
+    for (int i = 0; i < REGISTERS_SIZE; i++) {
+      cpu->actual_pcb.registers[i] = cpu->get_register(i);
+    }
 
-      // Verifica fim do processo
-      if (cpu->actual_pcb.PC >= cpu->actual_pcb.code_size) {
-        cout << "Process " << process.pid << " finished" << endl;
-        cpu->get_ram()->update_PCB(process.pcb_address, cpu->actual_pcb);
-        break;
-      }
+    // Verifica fim do processo
+    if (cpu->actual_pcb.PC >= cpu->actual_pcb.code_size) {
+      cout << "Process " << process.pid << " finished" << endl;
+      cpu->get_ram()->update_PCB(process.pcb_address, cpu->actual_pcb);
+      break;
+    }
 
-      // Verifica se quantum expirou
-      if (quantum >= QUANTUM) {
-        cpu->get_ram()->update_PCB(process.pcb_address, cpu->actual_pcb);
+    // Verifica se quantum expirou
+    if (quantum >= QUANTUM) {
+      cpu->get_ram()->update_PCB(process.pcb_address, cpu->actual_pcb);
 
-        // Muda estado para READY
-        process.state = READY;
+      // Muda estado para READY
+      process.state = READY;
 
-        // Adiciona processo na fila de prontos
-        pthread_mutex_lock(&ready_processes_mutex);
-        ready_processes.push(process);
-        pthread_mutex_unlock(&ready_processes_mutex);
+      // Adiciona processo na fila de prontos
+      pthread_mutex_lock(&ready_processes_mutex);
+      ready_processes.push(process.pid);
+      pthread_mutex_unlock(&ready_processes_mutex);
 
-        break;
-      }
+      break;
     }
   }
 
@@ -105,12 +104,12 @@ Process Cpu::get_process() {
     return p_empty;
   }
 
-  Process process = next_process.front();
+  int pid = next_process.front();
   next_process.pop();
 
   pthread_mutex_unlock(&next_process_mutex);
 
-  return process;
+  return processes_map[pid];
 }
 
 bool Cpu::InstructionFetch() {

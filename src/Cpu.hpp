@@ -60,7 +60,7 @@ class Cpu {
   }
 
   void open_log_file() {
-    cpu_file.open("cpu" + to_string(id) + ".log");
+    cpu_file.open("./out/cpu" + to_string(id) + ".log", ios::trunc);
     if (!cpu_file.is_open()) {
       cout << "Error opening file" << endl;
       exit(1);

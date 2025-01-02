@@ -1,6 +1,21 @@
 #include "OperatingSystem.hpp"
 
 OperatingSystem::OperatingSystem(Scheduler *scheduler, Ram *ram) {
+  Bootloader bootloader;
+
+  auto programs = bootloader.get_programs();
+  auto processes = bootloader.get_processes();
+  auto pcbs = bootloader.get_pcbs();
+
+  for (int i = 0; i < PROGRAMS_COUNT; i++) {
+    ram->insert_program(programs[i]);
+    ram->insert_PCB(pcbs[i]);
+
+    processes_map[i] = processes[i];
+
+    scheduler->add_ready(processes[i].pid);
+  }
+
   this->scheduler = scheduler;
   this->ram = ram;
   this->cache = new Cache(ram);
@@ -17,10 +32,6 @@ OperatingSystem::OperatingSystem(Scheduler *scheduler, Ram *ram) {
   }
 }
 
-void OperatingSystem::insert_process(Process process) {
-  this->processes.push_back(process);
-}
-
 bool OperatingSystem::check_finished() {
   int valid_processes = 0;
 
@@ -34,17 +45,6 @@ bool OperatingSystem::check_finished() {
 void *run_os(void *arg) {
   OperatingSystem *os = (OperatingSystem *)arg;
 
-  auto start = chrono::high_resolution_clock::now();
-  auto start_in_nano =
-      chrono::duration_cast<chrono::microseconds>(start.time_since_epoch())
-          .count();
-
-  cout << "Start: " << start_in_nano << endl << endl;
-
-  for (auto &p : os->processes) {
-    processes_map[p.pid].start_time = start_in_nano;
-  }
-
   while (true) {
     if (os->check_finished()) {
       kill(getpid(), SIGINT);
@@ -57,14 +57,14 @@ void *run_os(void *arg) {
     while (ready_processes.size()) {
       auto pid = ready_processes.front();
       ready_processes.pop();
-      os->scheduler->add_running(pid);
+      os->scheduler->add_ready(pid);
     }
 
     pthread_mutex_unlock(&ready_processes_mutex);
 
     // Verificando se há processos prontos
     pthread_mutex_lock(&running_mutex);
-    if (os->scheduler->get_running_size() == 0) {
+    if (os->scheduler->get_ready_size() == 0) {
       pthread_mutex_unlock(&running_mutex);
       continue;
     }

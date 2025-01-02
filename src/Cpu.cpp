@@ -75,7 +75,7 @@ void* run_core(void* arg) {
       }
 
       // Verifica fim do processo
-      if (cpu->actual_pcb.PC >= cpu->actual_pcb.code_size) {
+      if (cpu->actual_pcb.PC >= cpu->actual_pcb.program_size) {
         auto end = chrono::high_resolution_clock::now();
         auto duration =
             chrono::duration_cast<chrono::microseconds>(end - start);
@@ -157,10 +157,10 @@ Process Cpu::get_process() {
 }
 
 bool Cpu::InstructionFetch() {
-  if (this->PC >= actual_pcb.code_size) return false;
+  if (this->PC >= actual_pcb.program_size) return false;
 
   this->active_instruction =
-      ram->get_instruction(actual_pcb.code_address, this->PC);
+      ram->get_instruction(actual_pcb.program_address, this->PC);
 
   this->PC++;
 

@@ -3,6 +3,8 @@
 # Delete all files in data_folder
 rm -f data_folder/*
 
+make clean && make
+
 for((k = 0; k < 20; k++)) do
 
     # Clear the content of data.txt
@@ -12,7 +14,7 @@ for((k = 0; k < 20; k++)) do
     echo "Running with arguments: $ARGS"
     
     # Clear the screen, clean, build, and run with the current arguments
-    clear && make clean && make && make run ARGS="3 $i" &
+    clear && make run ARGS="3 $i" &
     
     # # Get the PID of the background process
     PID=$!

@@ -5,6 +5,7 @@
 
 #include <vector>
 
+#include "Bootloader.hpp"
 #include "Cache.hpp"
 #include "Cpu.hpp"
 #include "Scheduler.hpp"
@@ -21,10 +22,7 @@ class OperatingSystem {
  public:
   OperatingSystem(Scheduler *scheduler, Ram *ram);
 
-  vector<Process> processes;
   Scheduler *scheduler;
-
-  void insert_process(Process process);
 
   bool check_finished();
 };

@@ -29,4 +29,6 @@ extern Ram* global_ram;
 
 extern map<int, Process> processes_map;
 
+extern long get_now_in_milliseconds();
+
 #endif

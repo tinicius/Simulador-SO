@@ -13,3 +13,9 @@ Cache* global_cache = nullptr;
 Ram* global_ram = nullptr;
 
 map<int, Process> processes_map;
+
+long get_now_in_milliseconds() {
+  return chrono::duration_cast<chrono::microseconds>(
+             chrono::high_resolution_clock::now().time_since_epoch())
+      .count();
+}

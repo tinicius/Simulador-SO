@@ -18,6 +18,13 @@ enum ProcessState {
 typedef struct Process {
   int pid;
   int pcb_address;
+
+  long start_time = 0;
+
+  long timestamp = 0;
+  long waiting_time = 0;
+  long cpu_time = 0;
+
   ProcessState state;
 } Process;
 
@@ -33,12 +40,7 @@ typedef struct ProcessControlBlock {
   int PC;
   int registers[32];
 
-  //
   ProcessState state = READY;
-  int waiting_time = 0;
-  int cpu_time = 0;
-
-  int timestamp = 0;
 
 } ProcessControlBlock;
 

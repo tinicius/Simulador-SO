@@ -25,6 +25,8 @@ class OperatingSystem {
   Scheduler *scheduler;
 
   void insert_process(Process process);
+
+  bool check_finished();
 };
 
 void *run_os(void *arg);

@@ -4,6 +4,7 @@
 #include <iostream>
 #include <map>
 #include <sstream>
+#include <chrono>
 
 #include "Cache.hpp"
 #include "MemoryLogger.hpp"

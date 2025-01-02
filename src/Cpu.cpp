@@ -37,6 +37,19 @@ void* run_core(void* arg) {
 
     if (process.pid == -1) continue;
 
+    auto start = chrono::high_resolution_clock::now();
+
+    auto start_in_nano =
+        chrono::duration_cast<chrono::microseconds>(start.time_since_epoch())
+            .count();
+
+    cout << "Core: " << id << endl;
+    cout << "Process: " << process.pid << endl;
+    cout << "At: " << start_in_nano << endl;
+    cout << endl;
+
+    process.waiting_time += start_in_nano - process.start_time;
+
     int quantum = 0;
 
     // Buscar PCB na RAM
@@ -46,10 +59,6 @@ void* run_core(void* arg) {
     cpu->PC = cpu->actual_pcb.PC;
     cpu->set_registers(cpu->actual_pcb.registers);
 
-    cout << "Core: " << id << endl;
-    cout << "Process: " << process.pid << endl;
-    cout << endl;
-
     while (cpu->InstructionFetch()) {
       cpu->InstructionDecode();
       cpu->Execute();
@@ -57,11 +66,9 @@ void* run_core(void* arg) {
       cpu->WriteBack();
 
       quantum += 5;
-      cpu->actual_pcb.timestamp += 5;
-      cpu->actual_pcb.cpu_time += 5;
 
       cpu->actual_pcb.PC = cpu->PC;
-      
+
       // Atualizando registradores do PCB
       for (int i = 0; i < REGISTERS_SIZE; i++) {
         cpu->actual_pcb.registers[i] = cpu->get_register(i);
@@ -69,22 +76,55 @@ void* run_core(void* arg) {
 
       // Verifica fim do processo
       if (cpu->actual_pcb.PC >= cpu->actual_pcb.code_size) {
+        auto end = chrono::high_resolution_clock::now();
+        auto duration =
+            chrono::duration_cast<chrono::microseconds>(end - start);
+
+        process.cpu_time += duration.count();
+
+        long long end_in_nano =
+            chrono::duration_cast<chrono::microseconds>(end.time_since_epoch())
+                .count();
+
+        process.start_time = end_in_nano;
+
+        process.state = TERMINATED;
+
         cout << "Process " << process.pid << " finished" << endl;
+        cout << "At: " << process.start_time << endl;
+        cout << endl;
+
+        processes_map[process.pid] = process;
+
         cpu->get_ram()->update_PCB(process.pcb_address, cpu->actual_pcb);
         break;
       }
 
       // Verifica se quantum expirou
       if (quantum >= QUANTUM) {
+        auto end = chrono::high_resolution_clock::now();
+        auto duration =
+            chrono::duration_cast<chrono::microseconds>(end - start);
+
+        process.cpu_time += duration.count();
+
+        process.start_time =
+            chrono::duration_cast<chrono::microseconds>(end.time_since_epoch())
+                .count();
+
+        cout << "Process " << process.pid << " is out cpu" << endl;
+        cout << "At: " << process.start_time << endl;
+        cout << endl;
+
+        processes_map[process.pid] = process;
+
         cpu->get_ram()->update_PCB(process.pcb_address, cpu->actual_pcb);
 
         // Muda estado para READY
         process.state = READY;
 
         // Adiciona processo na fila de prontos
-        pthread_mutex_lock(&ready_processes_mutex);
-        ready_processes.push(process);
-        pthread_mutex_unlock(&ready_processes_mutex);
+        ready_processes.push(process.pid);
 
         break;
       }
@@ -100,17 +140,20 @@ Process Cpu::get_process() {
   if (next_process.empty()) {
     pthread_mutex_unlock(&next_process_mutex);
 
-    Process p_empty;
-    p_empty.pid = -1;
-    return p_empty;
+    Process empty;
+    empty.pid = -1;
+
+    return empty;
   }
 
-  Process process = next_process.front();
+  auto pid = next_process.front();
   next_process.pop();
 
   pthread_mutex_unlock(&next_process_mutex);
 
-  return process;
+  Process p = processes_map[pid];
+
+  return p;
 }
 
 bool Cpu::InstructionFetch() {
@@ -222,7 +265,8 @@ void Cpu::MemoryAccess() {
   switch (op) {
     case LOAD: {
       int address = get_register(2);
-      write_value = cache->read(address);
+      // write_value = cache->read(address);
+      write_value = ram->get_value(address);
       logger->log_memory_operation("LOAD", address, write_value);
       write_data = true;
       break;
@@ -236,7 +280,8 @@ void Cpu::MemoryAccess() {
     case STORE: {
       int address = get_register(2);
       int value = get_register(get_register(1));
-      cache->write(address, value);
+      // cache->write(address, value);
+      ram->set_value(address, value);
       logger->log_memory_operation("STORE", address, value);
       break;
     }

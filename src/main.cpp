@@ -6,7 +6,6 @@
 #include "Ram.hpp"
 #include "entities.hpp"
 
-
 // Variáveis globais para o handler
 extern Ram* global_ram;
 extern Cache* global_cache;
@@ -20,10 +19,39 @@ void signal_handler(int signum) {
 
     logger->close_log_file();
   }
+
+  // Print final state
+  ofstream data_file("/out/process.log", ios::app);
+
+  data_file << endl << endl;
+
+  for (auto [pid, process] : processes_map) {
+    data_file << "Processo: " << pid << endl;
+    data_file << "Cpu time: " << process.cpu_time << endl;
+    data_file << "Waiting time: " << process.waiting_time << endl;
+    data_file << "Timestamp: " << process.cpu_time + process.waiting_time
+              << endl;
+    data_file << "State: " << process.state << endl;
+
+    data_file << endl;
+  }
+
+  data_file << endl;
+
+  data_file.close();
+
   exit(signum);
 }
 
-int main() {
+int main(int argc, char* argv[]) {
+  if (argc >= 2) {
+    PROGRAMS_COUNT = stoi(argv[1]);
+    CORES_COUNT = stoi(argv[2]);
+  } else {
+    PROGRAMS_COUNT = 1;
+    CORES_COUNT = 1;
+  }
+
   signal(SIGINT, signal_handler);
   // Buscando programas do disco
   vector<vector<string>> programs;
@@ -35,6 +63,11 @@ int main() {
     string temp;
 
     while (getline(codigo, temp)) program.push_back(temp);
+
+    if (program.size() == 0) {
+      cout << "Invalid program" << endl;
+      exit(1);
+    }
 
     programs.push_back(program);
   }
@@ -69,9 +102,6 @@ int main() {
     pcb.code_size = program.size();
     pcb.PC = 0;
     pcb.state = READY;
-    pcb.waiting_time = 0;
-    pcb.cpu_time = 0;
-    pcb.timestamp = 0;
 
     // Inserindo PCB na RAM
     ram.insert_PCB(pcb);
@@ -81,6 +111,11 @@ int main() {
     p.pid = i;
     p.pcb_address = i;
     p.state = READY;
+    p.cpu_time = 0;
+    p.waiting_time = 0;
+    p.timestamp = 0;
+
+    processes_map[i] = p;
 
     // Inserindo processo ao escalonador
     scheduler.add_running(p.pid);

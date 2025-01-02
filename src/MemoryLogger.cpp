@@ -85,9 +85,6 @@ void MemoryLogger::log_pcbs_state() {
     log_file << "Code Size: " << pcb.code_size << endl;
     log_file << "PC: " << pcb.PC << endl;
     log_file << "State: " << pcb.state << endl;
-    log_file << "Waiting Time: " << pcb.waiting_time << endl;
-    log_file << "CPU Time: " << pcb.cpu_time << endl;
-    log_file << "Timestamp: " << pcb.timestamp << endl;
     log_file << endl;
   }
 

@@ -1,10 +1,10 @@
 #ifndef CPU_HPP
 #define CPU_HPP
 
+#include <chrono>
 #include <iostream>
 #include <map>
 #include <sstream>
-#include <chrono>
 
 #include "Cache.hpp"
 #include "MemoryLogger.hpp"
@@ -42,7 +42,7 @@ class Cpu {
       : id(id),
         cache(cache),
         ram(ram),
-        logger(MemoryLogger::getInstance(ram, cache)),
+        logger(MemoryLogger::get_instance()),
         write_data(false) {}
 
   // Add getter for id

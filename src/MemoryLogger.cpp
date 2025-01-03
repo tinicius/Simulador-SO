@@ -2,13 +2,29 @@
 
 MemoryLogger* MemoryLogger::instance = nullptr;
 
-MemoryLogger* MemoryLogger::getInstance(Ram* ram, Cache* cache) {
+void MemoryLogger::create_instance(Ram* ram, Cache* cache) {
+  if (instance != nullptr) return;
+
+  instance = new MemoryLogger();
+  instance->ram = ram;
+  instance->cache = cache;
+  instance->open_log_file();
+}
+
+void MemoryLogger::delete_instance() {
+  if (instance == nullptr) return;
+
+  instance->close_log_file();
+  delete instance;
+  instance = nullptr;
+}
+
+MemoryLogger* MemoryLogger::get_instance() {
   if (instance == nullptr) {
-    instance = new MemoryLogger();
-    instance->ram = ram;
-    instance->cache = cache;
-    instance->open_log_file();
+    cout << "Invalid instance!" << endl;
+    exit(1);
   }
+
   return instance;
 }
 

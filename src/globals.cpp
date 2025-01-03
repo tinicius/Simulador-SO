@@ -9,9 +9,6 @@ pthread_mutex_t next_process_mutex = PTHREAD_MUTEX_INITIALIZER;
 queue<int> ready_processes;
 pthread_mutex_t ready_processes_mutex = PTHREAD_MUTEX_INITIALIZER;
 
-Cache* global_cache = nullptr;
-Ram* global_ram = nullptr;
-
 map<int, Process> processes_map;
 
 long get_now_in_milliseconds() {

@@ -16,15 +16,22 @@ using namespace std;
 class OperatingSystem {
  private:
   vector<Cpu> cores;
-  Ram *ram;
+  Ram ram;
   Cache *cache;
 
  public:
-  OperatingSystem(Scheduler *scheduler, Ram *ram);
+  OperatingSystem();
+  ~OperatingSystem();
 
-  Scheduler *scheduler;
+  Scheduler scheduler;
+
+  void boot();
+
+  void init_cores();
 
   bool check_finished();
+
+  void log_processes_state();
 };
 
 void *run_os(void *arg);

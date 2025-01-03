@@ -19,7 +19,6 @@ class Scheduler {
 
  public:
   Scheduler();
-  Scheduler(vector<Process>& processes);
 
   int get_next_process_pid();
 

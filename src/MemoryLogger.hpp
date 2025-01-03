@@ -17,8 +17,9 @@ class MemoryLogger {
   ofstream log_file;
 
  public:
-  static MemoryLogger* getInstance(Ram* ram, Cache* cache);
-  ~MemoryLogger();  // Adicionar destrutor
+  static void create_instance(Ram* ram, Cache* cache);
+  static void delete_instance();
+  static MemoryLogger* get_instance();
 
   void log_memory_operation(const string& op, int address, int value);
   void log_state_change(int pid, ProcessState old_state,
@@ -28,8 +29,6 @@ class MemoryLogger {
   void log_process_finished(int pid, int result);
   void open_log_file();
   void close_log_file();
-}
-
-;
+};
 
 #endif

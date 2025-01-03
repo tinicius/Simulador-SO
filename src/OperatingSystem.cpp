@@ -35,6 +35,13 @@ void OperatingSystem::boot() {
 }
 
 void OperatingSystem::init_cores() {
+
+  core_process_map.resize(CORES_COUNT);
+
+  for (int i = 0; i < CORES_COUNT; i++) {
+    core_process_map[i] = -1;
+  }
+
   pthread_t t_core[CORES_COUNT];
 
   for (int i = 0; i < CORES_COUNT; i++) {
@@ -58,7 +65,7 @@ bool OperatingSystem::check_finished() {
 }
 
 void OperatingSystem::log_processes_state() {
-  ofstream data_file("/out/process.log", ios::app);
+  ofstream data_file("./out/process.log", ios::app);
 
   data_file << endl << endl;
 
@@ -92,11 +99,12 @@ void *run_os(void *arg) {
 
       os->log_processes_state();
 
+      SIGNAL = 1;
+
       pthread_exit(NULL);
     }
 
     // Adicionando novos processos prontos ao escalonador
-    pthread_mutex_lock(&ready_processes_mutex);
 
     while (ready_processes.size()) {
       auto pid = ready_processes.front();
@@ -104,12 +112,25 @@ void *run_os(void *arg) {
       os->scheduler.add_ready(pid);
     }
 
-    pthread_mutex_unlock(&ready_processes_mutex);
+    // Verificar se ha um core livre
+    int free = 0;
+    for (auto pid : core_process_map) {
+      if (pid == -1) free++;
+    }
+
+    if (free == 0) continue;
 
     int next_pid = os->scheduler.get_next_process_pid();
     if (next_pid == -1) continue;
 
-    next_process.push(next_pid);
+    // next_process.push(next_pid);
+
+    for (int i = 0 ; i < CORES_COUNT; i++) {
+      if (core_process_map[i] == -1) {
+        core_process_map[i] = next_pid;
+        break;
+      }
+    }
   }
 
   pthread_exit(NULL);

@@ -26,13 +26,15 @@ void* run_core(void* arg) {
   Cpu* cpu = (Cpu*)arg;
 
   if (cpu == nullptr) {
-    cout << "Cpu is null" << endl;
+    // cout << "Cpu is null" << endl;
     pthread_exit(NULL);
   }
 
   int id = cpu->get_id();
 
   while (true) {
+    if (SIGNAL == 1) break;
+
     auto process = cpu->get_process();
 
     if (process.pid == -1) continue;
@@ -43,10 +45,10 @@ void* run_core(void* arg) {
         chrono::duration_cast<chrono::microseconds>(start.time_since_epoch())
             .count();
 
-    cout << "Core: " << id << endl;
-    cout << "Process: " << process.pid << endl;
-    cout << "At: " << start_in_nano << endl;
-    cout << endl;
+    // cout << "Core: " << id << endl;
+    // cout << "Process: " << process.pid << endl;
+    // cout << "At: " << start_in_nano << endl;
+    // cout << endl;
 
     process.waiting_time += start_in_nano - process.start_time;
 
@@ -90,11 +92,13 @@ void* run_core(void* arg) {
 
         process.state = TERMINATED;
 
-        cout << "Process " << process.pid << " finished" << endl;
-        cout << "At: " << process.start_time << endl;
-        cout << endl;
+        // cout << "Process " << process.pid << " finished" << endl;
+        // cout << "At: " << process.start_time << endl;
+        // cout << endl;
 
         processes_map[process.pid] = process;
+
+        core_process_map[id] = -1;
 
         cpu->get_ram()->update_PCB(process.pcb_address, cpu->actual_pcb);
         break;
@@ -112,11 +116,13 @@ void* run_core(void* arg) {
             chrono::duration_cast<chrono::microseconds>(end.time_since_epoch())
                 .count();
 
-        cout << "Process " << process.pid << " is out cpu" << endl;
-        cout << "At: " << process.start_time << endl;
-        cout << endl;
+        // cout << "Process " << process.pid << " is out cpu" << endl;
+        // cout << "At: " << process.start_time << endl;
+        // cout << endl;
 
         processes_map[process.pid] = process;
+
+        core_process_map[id] = -1;
 
         cpu->get_ram()->update_PCB(process.pcb_address, cpu->actual_pcb);
 
@@ -135,25 +141,36 @@ void* run_core(void* arg) {
 }
 
 Process Cpu::get_process() {
-  pthread_mutex_lock(&next_process_mutex);
+  int pid = core_process_map[this->get_id()];
 
-  if (next_process.empty()) {
-    pthread_mutex_unlock(&next_process_mutex);
-
+  if (pid == -1) {
     Process empty;
     empty.pid = -1;
 
     return empty;
   }
 
-  auto pid = next_process.front();
-  next_process.pop();
+  return processes_map[pid];
 
-  pthread_mutex_unlock(&next_process_mutex);
+  // pthread_mutex_lock(&next_process_mutex);
 
-  Process p = processes_map[pid];
+  // if (next_process.empty()) {
+  //   pthread_mutex_unlock(&next_process_mutex);
 
-  return p;
+  //   Process empty;
+  //   empty.pid = -1;
+
+  //   return empty;
+  // }
+
+  // auto pid = next_process.front();
+  // next_process.pop();
+
+  // pthread_mutex_unlock(&next_process_mutex);
+
+  // Process p = processes_map[pid];
+
+  // return p;
 }
 
 bool Cpu::InstructionFetch() {

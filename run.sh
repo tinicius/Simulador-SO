@@ -2,30 +2,32 @@
 
 # Delete all files in data_folder
 rm -f data_folder/*
+mkdir -p data_folder
 
 make clean && make
 
-for((k = 0; k < 20; k++)) do
+MAX_CORES=8
+NUMBER_OF_PROGRAMS=1
+NUMBER_OF_RUNS_EACH_CORE=100
 
-    # Clear the content of data.txt
-    > data.txt
+for ((i = 1; i <= $MAX_CORES; i++)); do
+    rm -f -r "out/$i"
+    mkdir -p "out/$i"
 
-    for ((i = 1; i <= 10; i++)) do
-    echo "Running with arguments: $ARGS"
-    
-    # Clear the screen, clean, build, and run with the current arguments
-    clear && make run ARGS="3 $i" &
-    
-    # # Get the PID of the background process
-    PID=$!
-    wait $PID
-    
+    for ((p = 0; p <= $NUMBER_OF_RUNS_EACH_CORE; p++)); do
+        echo "Iteration: Core=$i, Run=$p"
+
+        # Use a subshell and timeout to avoid hanging
+        if ! timeout 10s bash -c "make run ARGS='$NUMBER_OF_PROGRAMS $i'" >> "out/$i/output.log" 2>> "out/$i/errors.log"; then
+            echo "Error occurred or timeout reached in iteration $p (Core=$i). Skipping..."
+            continue
+        fi
     done
 
-    touch "data_folder/data$k.txt"
+    # Process logs
+    touch "out/$i/process.log"
+    cp "out/process.log" "out/$i/process.log"
 
-    cp data.txt "data_folder/data$k.txt"
-
+    # Clear the content
+    > "out/process.log"
 done
-
-

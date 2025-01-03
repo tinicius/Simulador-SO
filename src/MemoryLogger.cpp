@@ -2,13 +2,29 @@
 
 MemoryLogger* MemoryLogger::instance = nullptr;
 
-MemoryLogger* MemoryLogger::getInstance(Ram* ram, Cache* cache) {
+void MemoryLogger::create_instance(Ram* ram, Cache* cache) {
+  if (instance != nullptr) return;
+
+  instance = new MemoryLogger();
+  instance->ram = ram;
+  instance->cache = cache;
+  instance->open_log_file();
+}
+
+void MemoryLogger::delete_instance() {
+  if (instance == nullptr) return;
+
+  instance->close_log_file();
+  delete instance;
+  instance = nullptr;
+}
+
+MemoryLogger* MemoryLogger::get_instance() {
   if (instance == nullptr) {
-    instance = new MemoryLogger();
-    instance->ram = ram;
-    instance->cache = cache;
-    instance->open_log_file();
+    cout << "Invalid instance!" << endl;
+    exit(1);
   }
+
   return instance;
 }
 
@@ -70,24 +86,5 @@ void MemoryLogger::log_final_state() {
   }
 
   log_file << "\n=== End of Memory State ===" << endl;
-  log_file.flush();
-}
-
-void MemoryLogger::log_pcbs_state() {
-  log_file << "\n=== PCBs State ===" << endl;
-
-  for (int i = 0; i < 32; i++) {
-    auto pcb = ram->get_PCB(i);
-
-    log_file << "PID: " << pcb.pid << endl;
-    log_file << "Priority: " << pcb.priority << endl;
-    log_file << "Code Address: " << pcb.code_address << endl;
-    log_file << "Code Size: " << pcb.code_size << endl;
-    log_file << "PC: " << pcb.PC << endl;
-    log_file << "State: " << pcb.state << endl;
-    log_file << endl;
-  }
-
-  log_file << "\n=== End of PCBs State ===" << endl;
   log_file.flush();
 }

@@ -4,6 +4,7 @@
 using namespace std;
 
 #include <vector>
+#include <chrono>
 
 #define REGISTERS_SIZE 32
 
@@ -33,8 +34,8 @@ typedef struct ProcessControlBlock {
   int priority;
 
   // Memory
-  int code_address;
-  int code_size;
+  int program_address;
+  int program_size;
 
   // Registers
   int PC;

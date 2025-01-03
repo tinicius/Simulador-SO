@@ -2,7 +2,7 @@
 
 Ram::Ram() { this->free_space.resize(32, 0); }
 
-void Ram::insert_code(vector<string> code) { this->codes.push_back(code); }
+void Ram::insert_program(vector<string> program) { this->programs.push_back(program); }
 
 void Ram::insert_PCB(ProcessControlBlock PCB) { this->PCBs.push_back(PCB); }
 
@@ -16,17 +16,17 @@ void Ram::update_PCB(int pcb_address, ProcessControlBlock PCB) {
 }
 
 string Ram::get_instruction(int code_address, int PC) {
-  if (code_address >= (int)codes.size()) {
+  if (code_address >= (int)programs.size()) {
     cout << "Invalid code address" << endl;
     exit(1);
   }
 
-  if (PC >= (int)codes[code_address].size()) {
+  if (PC >= (int)programs[code_address].size()) {
     cout << "Invalid PC" << endl;
     exit(1);
   }
 
-  return codes[code_address][PC];
+  return programs[code_address][PC];
 }
 
 ProcessControlBlock Ram::get_PCB(int pcb_address) {

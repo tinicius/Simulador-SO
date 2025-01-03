@@ -24,9 +24,8 @@ extern pthread_mutex_t next_process_mutex;
 extern queue<int> ready_processes;
 extern pthread_mutex_t ready_processes_mutex;
 
-extern Cache* global_cache;
-extern Ram* global_ram;
-
 extern map<int, Process> processes_map;
+
+extern long get_now_in_milliseconds();
 
 #endif

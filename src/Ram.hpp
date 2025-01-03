@@ -12,14 +12,14 @@ using namespace std;
 
 class Ram {
  private:
-  vector<vector<string>> codes;      // Regiao com os programas
+  vector<vector<string>> programs;      // Regiao com os programas
   vector<ProcessControlBlock> PCBs;  // Regiao com os PCBs
   vector<int> free_space;            // Espacos livres
 
  public:
   Ram();
 
-  void insert_code(vector<string> code);
+  void insert_program(vector<string> program);
 
   void insert_PCB(ProcessControlBlock PCB);
   void update_PCB(int pcb_address, ProcessControlBlock PCB);

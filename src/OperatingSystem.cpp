@@ -9,6 +9,8 @@ OperatingSystem::OperatingSystem() : ram(Ram()), scheduler(Scheduler()) {
 OperatingSystem::~OperatingSystem() { delete cache; }
 
 void OperatingSystem::boot() {
+  processes_map.resize(PROGRAMS_COUNT);
+
   // Carregando programas
   Bootloader bootloader;
 
@@ -35,40 +37,50 @@ void OperatingSystem::boot() {
 }
 
 void OperatingSystem::init_cores() {
-  pthread_t t_core[CORES_COUNT];
+  core_mutex.resize(CORES_COUNT);
+
+  ready_process.resize(CORES_COUNT);
+
+  for (int i = 0; i < CORES_COUNT; i++) {
+    pthread_mutex_init(&core_mutex[i], NULL);
+    ready_process[i] = -1;
+  }
+
+  // pthread_t t_core[CORES_COUNT];
 
   for (int i = 0; i < CORES_COUNT; i++) {
     Cpu core(i, &ram, cache);
     cores.push_back(core);
   }
 
-  for (int i = 0; i < CORES_COUNT; i++) {
-    pthread_create(&t_core[i], NULL, run_core, &cores[i]);
-  }
+  // for (int i = 0; i < CORES_COUNT; i++) {
+  //   pthread_create(&t_core[i], NULL, run_core, &cores[i]);
+  // }
 }
 
 bool OperatingSystem::check_finished() {
-  int valid_processes = 0;
+  int end_processes = 0;
 
-  for (auto [a, b] : processes_map) {
-    if (b.state != TERMINATED) valid_processes++;
+  for (auto &p : processes_map) {
+    if (p.state == TERMINATED) end_processes++;
   }
 
-  return valid_processes == 0;
+  return end_processes == PROGRAMS_COUNT;
 }
 
 void OperatingSystem::log_processes_state() {
-  ofstream data_file("/out/process.log", ios::app);
+  ofstream data_file("./out/process.log", ios::app);
 
   data_file << endl << endl;
 
-  for (auto [pid, process] : processes_map) {
-    data_file << "Processo: " << pid << endl;
-    data_file << "Cpu time: " << process.cpu_time << endl;
-    data_file << "Waiting time: " << process.waiting_time << endl;
-    data_file << "Timestamp: " << process.cpu_time + process.waiting_time
+  for (int i = 0; i < PROGRAMS_COUNT; i++) {
+    data_file << "Processo: " << i << endl;
+    data_file << "Cpu time: " << processes_map[i].cpu_time << endl;
+    data_file << "Waiting time: " << processes_map[i].waiting_time << endl;
+    data_file << "Timestamp: "
+              << processes_map[i].cpu_time + processes_map[i].waiting_time
               << endl;
-    data_file << "State: " << process.state << endl;
+    data_file << "State: " << processes_map[i].state << endl;
 
     data_file << endl;
   }
@@ -95,21 +107,34 @@ void *run_os(void *arg) {
       pthread_exit(NULL);
     }
 
-    // Adicionando novos processos prontos ao escalonador
-    pthread_mutex_lock(&ready_processes_mutex);
+    for (int i = 0; i < CORES_COUNT; i++) {
+      if (pthread_mutex_trylock(&core_mutex[i]) != 0) continue;
 
-    while (ready_processes.size()) {
-      auto pid = ready_processes.front();
-      ready_processes.pop();
-      os->scheduler.add_ready(pid);
+      if (ready_process[i] != -1) {
+        os->scheduler.add_ready(ready_process[i]);
+        ready_process[i] = -1;
+      }
+
+      int next_pid = os->scheduler.get_next_process_pid();
+
+      if (next_pid == -1) {
+        pthread_mutex_unlock(&core_mutex[i]);
+        continue;
+      }
+
+      CpuThreadArgs *args = (CpuThreadArgs *)malloc(sizeof(CpuThreadArgs));
+
+      if (args == NULL) {
+        perror("Erro ao alocar memória para args");
+        exit(EXIT_FAILURE);
+      }
+
+      args->pid = next_pid;
+      args->cpu = &os->cores[i];
+
+      pthread_t t_core;
+      pthread_create(&t_core, NULL, run_core, args);
     }
-
-    pthread_mutex_unlock(&ready_processes_mutex);
-
-    int next_pid = os->scheduler.get_next_process_pid();
-    if (next_pid == -1) continue;
-
-    next_process.push(next_pid);
   }
 
   pthread_exit(NULL);

@@ -17,8 +17,7 @@ using namespace std;
 
 class Cpu {
  private:
- private:
-  int id;  // Move id to private and first
+  int id;
   Cache* cache;
   Ram* ram;
   MemoryLogger* logger;
@@ -28,6 +27,8 @@ class Cpu {
   int write_value;
   int op;
 
+  chrono::_V2::system_clock::time_point start;
+
   vector<string> split_instruction(string instruction);
 
   void set_register(int address, int value);
@@ -36,16 +37,11 @@ class Cpu {
 
  public:
   ProcessControlBlock actual_pcb;
-  // Program Counter - Registrador especial
-  int PC;
-  Cpu(int id, Ram* ram, Cache* cache)
-      : id(id),
-        cache(cache),
-        ram(ram),
-        logger(MemoryLogger::get_instance()),
-        write_data(false) {}
 
-  // Add getter for id
+  int PC;
+
+  Cpu(int id, Ram* ram, Cache* cache);
+
   int get_id() const { return id; }
   Ram* get_ram() { return ram; }
 
@@ -55,8 +51,6 @@ class Cpu {
     register_bank.set_registers(registers);
   }
 
-  Process get_process();
-
   // Pipeline MIPS
   bool InstructionFetch();
   void InstructionDecode();
@@ -65,7 +59,12 @@ class Cpu {
   void WriteBack();
 };
 
-void* run_core(void* arg);
+typedef struct CpuThreadArgs {
+  Cpu* cpu;
+  int pid;
+} CpuThreadArgs;
+
+void* run_core(void* args);
 
 enum InstructionType {
   LOAD,

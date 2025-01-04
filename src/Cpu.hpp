@@ -10,6 +10,7 @@
 #include "MemoryLogger.hpp"
 #include "Ram.hpp"
 #include "RegisterBank.hpp"
+#include "ULA.hpp"
 #include "entities.hpp"
 #include "globals.hpp"
 
@@ -20,6 +21,8 @@ class Cpu {
   int id;
   Cache* cache;
   Ram* ram;
+  ULA ula;
+
   MemoryLogger* logger;
   string active_instruction;
   RegisterBank register_bank;
@@ -32,8 +35,6 @@ class Cpu {
   vector<string> split_instruction(string instruction);
 
   void set_register(int address, int value);
-
-  int ula(int op1, int op2, char oper);
 
  public:
   ProcessControlBlock actual_pcb;

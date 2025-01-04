@@ -19,7 +19,7 @@ Bootloader::Bootloader() {
 }
 
 Process Bootloader::get_process(int pid, int pcb_address) {
-  auto now = chrono::duration_cast<chrono::milliseconds>(
+  auto now = chrono::duration_cast<chrono::microseconds>(
                  chrono::system_clock::now().time_since_epoch())
                  .count();
 

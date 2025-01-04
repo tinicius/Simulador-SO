@@ -5,6 +5,7 @@
 #include "OperatingSystem.hpp"
 #include "Ram.hpp"
 #include "entities.hpp"
+#include "globals.hpp"
 
 int main(int argc, char* argv[]) {
   if (argc >= 2) {
@@ -14,6 +15,9 @@ int main(int argc, char* argv[]) {
     PROGRAMS_COUNT = 1;
     CORES_COUNT = 1;
   }
+
+  cpu_history.resize(CORES_COUNT);
+  process_history.resize(PROGRAMS_COUNT);
 
   // Inicializando SO
   OperatingSystem so;

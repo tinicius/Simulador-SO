@@ -4,18 +4,6 @@ map<string, InstructionType> instruction_map = {
     {"ILOAD", ILOAD}, {"ADD", ADD}, {"STORE", STORE}, {"BEQ", BEQ},
     {"J", J},         {"SUB", SUB}, {"MUL", MUL}};
 
-int Cpu::ula(int op1, int op2, char oper) {
-  if (oper == '+')
-    return op1 + op2;
-  else if (oper == '-')
-    return op1 - op2;
-  else if (oper == '*')
-    return op1 * op2;
-  else if (oper == '/')
-    return op1 / op2;
-  return 0;
-}
-
 Cpu::Cpu(int id, Ram* ram, Cache* cache)
     : id(id),
       cache(cache),
@@ -34,6 +22,9 @@ void* run_core(void* args) {
 
   Cpu* cpu = cpu_thread_args->cpu;
   int pid = cpu_thread_args->pid;
+
+  cpu_history[cpu->get_id()].push_back(pid);
+  process_history[pid].push_back(cpu->get_id());
 
   auto process = processes_map[pid];
 
@@ -175,29 +166,29 @@ void Cpu::Execute()  // Unidade de controle
 {
   switch (op) {
     case ADD: {
-      write_value = ula(get_register(get_register(2)),
-                        get_register(get_register(3)), '+');
+      write_value =
+          ula.add(get_register(get_register(2)), get_register(get_register(3)));
 
       write_data = true;
       break;
     }
     case SUB: {
-      write_value = ula(get_register(get_register(2)),
-                        get_register(get_register(3)), '-');
+      write_value =
+          ula.sub(get_register(get_register(2)), get_register(get_register(3)));
 
       write_data = true;
       break;
     }
     case MUL: {
-      write_value = ula(get_register(get_register(2)),
-                        get_register(get_register(3)), '*');
+      write_value =
+          ula.mul(get_register(get_register(2)), get_register(get_register(3)));
 
       write_data = true;
       break;
     }
     case DIV: {
-      write_value = ula(get_register(get_register(2)),
-                        get_register(get_register(3)), '/');
+      write_value =
+          ula.div(get_register(get_register(2)), get_register(get_register(3)));
 
       write_data = true;
       break;

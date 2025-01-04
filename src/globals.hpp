@@ -24,4 +24,7 @@ extern vector<Process> processes_map;
 
 extern vector<pthread_mutex_t> core_mutex;
 
+extern vector<vector<int>> cpu_history;
+extern vector<vector<int>> process_history;  
+
 #endif

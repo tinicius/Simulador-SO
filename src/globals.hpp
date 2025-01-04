@@ -13,23 +13,15 @@ using namespace std;
 
 #define endl '\n'
 
-#define QUANTUM 10  // Quantum em ciclos de clock
-
-extern int SIGNAL;
+#define QUANTUM 5  // Quantum em ciclos de clock
 
 extern int PROGRAMS_COUNT;
 extern int CORES_COUNT;
 
-extern queue<int> next_process;
-extern pthread_mutex_t next_process_mutex;
+extern vector<int> ready_process;
 
-extern queue<int> ready_processes;
-extern pthread_mutex_t ready_processes_mutex;
+extern vector<Process> processes_map;
 
-extern map<int, Process> processes_map;
-
-extern long get_now_in_milliseconds();
-
-extern vector<int> core_process_map;
+extern vector<pthread_mutex_t> core_mutex;
 
 #endif

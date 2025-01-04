@@ -15,7 +15,7 @@ using namespace std;
 
 class OperatingSystem {
  private:
-  vector<Cpu> cores;
+  
   Ram ram;
   Cache *cache;
 
@@ -24,6 +24,8 @@ class OperatingSystem {
   ~OperatingSystem();
 
   Scheduler scheduler;
+
+  vector<Cpu> cores;
 
   void boot();
 

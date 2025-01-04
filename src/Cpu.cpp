@@ -16,161 +16,111 @@ int Cpu::ula(int op1, int op2, char oper) {
   return 0;
 }
 
+Cpu::Cpu(int id, Ram* ram, Cache* cache)
+    : id(id),
+      cache(cache),
+      ram(ram),
+      logger(MemoryLogger::get_instance()),
+      write_data(false) {}
+
 int Cpu::get_register(int address) { return register_bank.get_value(address); }
 
 void Cpu::set_register(int address, int value) {
   register_bank.set_value(address, value);
 }
 
-void* run_core(void* arg) {
-  Cpu* cpu = (Cpu*)arg;
+void* run_core(void* args) {
+  CpuThreadArgs* cpu_thread_args = (CpuThreadArgs*)args;
 
-  if (cpu == nullptr) {
-    // cout << "Cpu is null" << endl;
-    pthread_exit(NULL);
-  }
+  Cpu* cpu = cpu_thread_args->cpu;
+  int pid = cpu_thread_args->pid;
 
-  int id = cpu->get_id();
+  auto process = processes_map[pid];
 
-  while (true) {
-    if (SIGNAL == 1) break;
+  auto start = chrono::high_resolution_clock::now();
 
-    auto process = cpu->get_process();
+  auto start_in_nano =
+      chrono::duration_cast<chrono::microseconds>(start.time_since_epoch())
+          .count();
 
-    if (process.pid == -1) continue;
+  process.waiting_time += start_in_nano - process.start_time;
 
-    auto start = chrono::high_resolution_clock::now();
+  // Inicializando quantum
+  int quantum = 0;
 
-    auto start_in_nano =
-        chrono::duration_cast<chrono::microseconds>(start.time_since_epoch())
-            .count();
+  // Buscar PCB na RAM
+  cpu->actual_pcb = cpu->get_ram()->get_PCB(process.pcb_address);
 
-    // cout << "Core: " << id << endl;
-    // cout << "Process: " << process.pid << endl;
-    // cout << "At: " << start_in_nano << endl;
-    // cout << endl;
+  // Atualizando registradores
+  cpu->PC = cpu->actual_pcb.PC;
+  cpu->set_registers(cpu->actual_pcb.registers);
 
-    process.waiting_time += start_in_nano - process.start_time;
+  while (cpu->InstructionFetch()) {
+    cpu->InstructionDecode();
+    cpu->Execute();
+    cpu->MemoryAccess();
+    cpu->WriteBack();
 
-    int quantum = 0;
+    quantum += 5;
 
-    // Buscar PCB na RAM
-    cpu->actual_pcb = cpu->get_ram()->get_PCB(process.pcb_address);
+    cpu->actual_pcb.PC = cpu->PC;
 
-    // Atualizando registradores
-    cpu->PC = cpu->actual_pcb.PC;
-    cpu->set_registers(cpu->actual_pcb.registers);
+    // Atualizando registradores do PCB
+    for (int i = 0; i < REGISTERS_SIZE; i++) {
+      cpu->actual_pcb.registers[i] = cpu->get_register(i);
+    }
 
-    while (cpu->InstructionFetch()) {
-      cpu->InstructionDecode();
-      cpu->Execute();
-      cpu->MemoryAccess();
-      cpu->WriteBack();
+    // Verifica fim do processo
+    if (cpu->actual_pcb.PC >= cpu->actual_pcb.program_size) {
+      auto end = chrono::high_resolution_clock::now();
+      auto duration = chrono::duration_cast<chrono::microseconds>(end - start);
 
-      quantum += 5;
+      // Salvando tempo de CPU
+      process.cpu_time += duration.count();
 
-      cpu->actual_pcb.PC = cpu->PC;
+      long end_in_nano =
+          chrono::duration_cast<chrono::microseconds>(end.time_since_epoch())
+              .count();
 
-      // Atualizando registradores do PCB
-      for (int i = 0; i < REGISTERS_SIZE; i++) {
-        cpu->actual_pcb.registers[i] = cpu->get_register(i);
-      }
+      process.start_time = end_in_nano;
+      process.state = TERMINATED;
 
-      // Verifica fim do processo
-      if (cpu->actual_pcb.PC >= cpu->actual_pcb.program_size) {
-        auto end = chrono::high_resolution_clock::now();
-        auto duration =
-            chrono::duration_cast<chrono::microseconds>(end - start);
+      processes_map[process.pid] = process;
 
-        process.cpu_time += duration.count();
+      cpu->get_ram()->update_PCB(process.pcb_address, cpu->actual_pcb);
 
-        long long end_in_nano =
-            chrono::duration_cast<chrono::microseconds>(end.time_since_epoch())
-                .count();
+      cout << "Process " << process.pid << " finished!" << endl;
+      break;
+    }
 
-        process.start_time = end_in_nano;
+    // Verifica se quantum expirou
+    if (quantum >= QUANTUM) {
+      auto end = chrono::high_resolution_clock::now();
+      auto duration = chrono::duration_cast<chrono::microseconds>(end - start);
 
-        process.state = TERMINATED;
+      process.cpu_time += duration.count();
 
-        // cout << "Process " << process.pid << " finished" << endl;
-        // cout << "At: " << process.start_time << endl;
-        // cout << endl;
+      process.start_time =
+          chrono::duration_cast<chrono::microseconds>(end.time_since_epoch())
+              .count();
 
-        processes_map[process.pid] = process;
+      processes_map[process.pid] = process;
 
-        core_process_map[id] = -1;
+      cpu->get_ram()->update_PCB(process.pcb_address, cpu->actual_pcb);
 
-        cpu->get_ram()->update_PCB(process.pcb_address, cpu->actual_pcb);
-        break;
-      }
+      // Muda estado para READY
+      process.state = READY;
 
-      // Verifica se quantum expirou
-      if (quantum >= QUANTUM) {
-        auto end = chrono::high_resolution_clock::now();
-        auto duration =
-            chrono::duration_cast<chrono::microseconds>(end - start);
+      // Adiciona processo na fila de prontos
+      ready_process[cpu->get_id()] = process.pid;
 
-        process.cpu_time += duration.count();
-
-        process.start_time =
-            chrono::duration_cast<chrono::microseconds>(end.time_since_epoch())
-                .count();
-
-        // cout << "Process " << process.pid << " is out cpu" << endl;
-        // cout << "At: " << process.start_time << endl;
-        // cout << endl;
-
-        processes_map[process.pid] = process;
-
-        core_process_map[id] = -1;
-
-        cpu->get_ram()->update_PCB(process.pcb_address, cpu->actual_pcb);
-
-        // Muda estado para READY
-        process.state = READY;
-
-        // Adiciona processo na fila de prontos
-        ready_processes.push(process.pid);
-
-        break;
-      }
+      break;
     }
   }
 
+  pthread_mutex_unlock(&core_mutex[cpu->get_id()]);
+  free(cpu_thread_args);
   pthread_exit(NULL);
-}
-
-Process Cpu::get_process() {
-  int pid = core_process_map[this->get_id()];
-
-  if (pid == -1) {
-    Process empty;
-    empty.pid = -1;
-
-    return empty;
-  }
-
-  return processes_map[pid];
-
-  // pthread_mutex_lock(&next_process_mutex);
-
-  // if (next_process.empty()) {
-  //   pthread_mutex_unlock(&next_process_mutex);
-
-  //   Process empty;
-  //   empty.pid = -1;
-
-  //   return empty;
-  // }
-
-  // auto pid = next_process.front();
-  // next_process.pop();
-
-  // pthread_mutex_unlock(&next_process_mutex);
-
-  // Process p = processes_map[pid];
-
-  // return p;
 }
 
 bool Cpu::InstructionFetch() {

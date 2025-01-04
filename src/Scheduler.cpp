@@ -2,29 +2,17 @@
 
 using namespace std;
 
-pthread_mutex_t running_mutex = PTHREAD_MUTEX_INITIALIZER;
-
 Scheduler::Scheduler() {}
 
 int Scheduler::get_next_process_pid() {
-  // pthread_mutex_lock(&running_mutex);
+  if (this->ready.size() == 0) return -1;
 
-  if (this->ready.size() == 0) {
-    // pthread_mutex_unlock(&running_mutex);
-    return -1;
-  }
+  int pid = this->ready.front();
+  this->ready.pop_front();
 
-  int pid = this->ready[0];
-  this->ready.erase(this->ready.begin());
-
-  // pthread_mutex_unlock(&running_mutex);
   return pid;
 }
 
-void Scheduler::add_ready(int pid) {
-  // pthread_mutex_lock(&running_mutex);
-  this->ready.push_back(pid);
-  // pthread_mutex_unlock(&running_mutex);
-}
+void Scheduler::add_ready(int pid) { this->ready.push_back(pid); }
 
 int Scheduler::get_ready_size() { return this->ready.size(); }

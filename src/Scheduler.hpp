@@ -5,7 +5,7 @@
 
 #include <algorithm>
 #include <iostream>
-#include <vector>
+#include <list>
 
 #include "entities.hpp"
 
@@ -15,7 +15,7 @@ extern pthread_mutex_t running_mutex;
 
 class Scheduler {
  private:
-  vector<int> ready;  // PIDs of ready processes
+  list<int> ready;  // PIDs of ready processes
 
  public:
   Scheduler();

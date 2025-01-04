@@ -6,9 +6,9 @@ mkdir -p data_folder
 
 make clean && make
 
-MAX_CORES=8
-NUMBER_OF_PROGRAMS=1
-NUMBER_OF_RUNS_EACH_CORE=100
+MAX_CORES=20
+NUMBER_OF_PROGRAMS=16
+NUMBER_OF_RUNS_EACH_CORE=300
 
 for ((i = 1; i <= $MAX_CORES; i++)); do
     rm -f -r "out/$i"
@@ -22,6 +22,7 @@ for ((i = 1; i <= $MAX_CORES; i++)); do
             echo "Error occurred or timeout reached in iteration $p (Core=$i). Skipping..."
             continue
         fi
+
     done
 
     # Process logs

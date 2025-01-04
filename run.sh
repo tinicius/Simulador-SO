@@ -1,14 +1,10 @@
 #!/bin/bash
 
-# Delete all files in data_folder
-rm -f data_folder/*
-mkdir -p data_folder
-
 make clean && make
 
-MAX_CORES=20
+MAX_CORES=8
 NUMBER_OF_PROGRAMS=16
-NUMBER_OF_RUNS_EACH_CORE=300
+NUMBER_OF_RUNS_EACH_CORE=100
 
 for ((i = 1; i <= $MAX_CORES; i++)); do
     rm -f -r "out/$i"

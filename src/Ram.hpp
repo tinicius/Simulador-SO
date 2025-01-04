@@ -12,7 +12,7 @@ using namespace std;
 
 class Ram {
  private:
-  vector<vector<string>> programs;      // Regiao com os programas
+  vector<vector<string>> programs;   // Regiao com os programas
   vector<ProcessControlBlock> PCBs;  // Regiao com os PCBs
   vector<int> free_space;            // Espacos livres
 

@@ -3,8 +3,8 @@
 
 using namespace std;
 
+#include <map>
 #include <vector>
-#include <chrono>
 
 #define REGISTERS_SIZE 32
 
@@ -44,5 +44,20 @@ typedef struct ProcessControlBlock {
   ProcessState state = READY;
 
 } ProcessControlBlock;
+
+enum InstructionType {
+  LOAD,
+  ILOAD,
+  ADD,
+  STORE,
+  BEQ,
+  J,
+  SUB,
+  MUL,
+  DIV,
+  SLT,
+  BNE,
+  NOP
+};
 
 #endif

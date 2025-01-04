@@ -8,6 +8,7 @@
 
 #include "Cache.hpp"
 #include "MemoryLogger.hpp"
+#include "PipelineMips.hpp"
 #include "Ram.hpp"
 #include "RegisterBank.hpp"
 #include "ULA.hpp"
@@ -16,15 +17,21 @@
 
 using namespace std;
 
+class ControlUnit;
+
 class Cpu {
  private:
   int id;
+
   Cache* cache;
   Ram* ram;
   ULA ula;
+  ControlUnit control_unit;
+  PipelineMips pipeline;
 
   MemoryLogger* logger;
-  string active_instruction;
+
+  int PC;
   RegisterBank register_bank;
   bool write_data;
   int write_value;
@@ -34,30 +41,44 @@ class Cpu {
 
   vector<string> split_instruction(string instruction);
 
-  void set_register(int address, int value);
-
  public:
   ProcessControlBlock actual_pcb;
 
-  int PC;
-
   Cpu(int id, Ram* ram, Cache* cache);
 
-  int get_id() const { return id; }
-  Ram* get_ram() { return ram; }
+  Cpu(const Cpu& cpu) : control_unit(this), pipeline(&control_unit) {
+    this->pipeline = PipelineMips(&this->control_unit);
+
+    this->id = cpu.id;
+    this->cache = cpu.cache;
+    this->ram = cpu.ram;
+
+    this->logger = cpu.logger;
+    this->write_data = false;
+  };
+
+  int get_id();
+  Ram* get_ram();
+
+  PipelineMips* get_pipeline();
+
+  ULA* get_ula();
+
+  string get_instruction(int program_address, int PC);
+
+  int get_pc();
+  void set_pc(int pc);
 
   int get_register(int address);
+  void set_register(int address, int value);
 
-  void set_registers(int registers[REGISTERS_SIZE]) {
-    register_bank.set_registers(registers);
-  }
+  void set_registers(int registers[REGISTERS_SIZE]);
 
-  // Pipeline MIPS
-  bool InstructionFetch();
-  void InstructionDecode();
-  void Execute();
-  void MemoryAccess();
-  void WriteBack();
+  int get_write_value();
+  void set_write_value(int value);
+
+  bool get_write_data();
+  void set_write_data(bool value);
 };
 
 typedef struct CpuThreadArgs {
@@ -66,19 +87,5 @@ typedef struct CpuThreadArgs {
 } CpuThreadArgs;
 
 void* run_core(void* args);
-
-enum InstructionType {
-  LOAD,
-  ILOAD,
-  ADD,
-  STORE,
-  BEQ,
-  J,
-  SUB,
-  MUL,
-  DIV,
-  SLT,
-  BNE,
-};
 
 #endif

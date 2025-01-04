@@ -1,21 +1,51 @@
 #include "Cpu.hpp"
 
-map<string, InstructionType> instruction_map = {
-    {"ILOAD", ILOAD}, {"ADD", ADD}, {"STORE", STORE}, {"BEQ", BEQ},
-    {"J", J},         {"SUB", SUB}, {"MUL", MUL}};
+#include "ControlUnit.hpp"
 
 Cpu::Cpu(int id, Ram* ram, Cache* cache)
     : id(id),
       cache(cache),
       ram(ram),
+      control_unit(this),
+      pipeline(&control_unit),
       logger(MemoryLogger::get_instance()),
       write_data(false) {}
+
+int Cpu::get_id() { return id; }
+
+Ram* Cpu::get_ram() { return ram; }
+
+PipelineMips* Cpu::get_pipeline() { return &pipeline; }
+
+ULA* Cpu::get_ula() { return &ula; }
+
+string Cpu::get_instruction(int program_address, int PC) {
+  return ram->get_instruction(program_address, PC);
+}
+
+int Cpu::get_pc() { return PC; }
+
+void Cpu::set_pc(int pc) { PC = pc; }
 
 int Cpu::get_register(int address) { return register_bank.get_value(address); }
 
 void Cpu::set_register(int address, int value) {
   register_bank.set_value(address, value);
 }
+
+void Cpu::set_registers(int registers[REGISTERS_SIZE]) {
+  for (int i = 0; i < REGISTERS_SIZE; i++) {
+    register_bank.set_value(i, registers[i]);
+  }
+}
+
+int Cpu::get_write_value() { return write_value; }
+
+void Cpu::set_write_value(int value) { write_value = value; }
+
+bool Cpu::get_write_data() { return write_data; }
+
+void Cpu::set_write_data(bool value) { write_data = value; }
 
 void* run_core(void* args) {
   CpuThreadArgs* cpu_thread_args = (CpuThreadArgs*)args;
@@ -43,18 +73,22 @@ void* run_core(void* args) {
   cpu->actual_pcb = cpu->get_ram()->get_PCB(process.pcb_address);
 
   // Atualizando registradores
-  cpu->PC = cpu->actual_pcb.PC;
+  cpu->set_pc(cpu->actual_pcb.PC);
   cpu->set_registers(cpu->actual_pcb.registers);
 
-  while (cpu->InstructionFetch()) {
-    cpu->InstructionDecode();
-    cpu->Execute();
-    cpu->MemoryAccess();
-    cpu->WriteBack();
+  auto pipeline = cpu->get_pipeline();
+
+  while (pipeline->instruction_fetch(cpu->get_pc(),
+                                     cpu->actual_pcb.program_address,
+                                     cpu->actual_pcb.program_size)) {
+    pipeline->instruction_decode();
+    pipeline->execute();
+    pipeline->memory_access();
+    pipeline->write_back();
 
     quantum += 5;
 
-    cpu->actual_pcb.PC = cpu->PC;
+    cpu->actual_pcb.PC = cpu->get_pc();
 
     // Atualizando registradores do PCB
     for (int i = 0; i < REGISTERS_SIZE; i++) {
@@ -112,143 +146,4 @@ void* run_core(void* args) {
   pthread_mutex_unlock(&core_mutex[cpu->get_id()]);
   free(cpu_thread_args);
   pthread_exit(NULL);
-}
-
-bool Cpu::InstructionFetch() {
-  if (this->PC >= actual_pcb.program_size) return false;
-
-  this->active_instruction =
-      ram->get_instruction(actual_pcb.program_address, this->PC);
-
-  this->PC++;
-
-  return true;
-}
-
-vector<string> Cpu::split_instruction(string instruction) {
-  vector<string> result;
-  istringstream iss(instruction);
-  string word;
-
-  while (iss >> word) {
-    result.push_back(word);
-  }
-
-  while (result.size() < 4) {
-    result.push_back("!");
-  }
-
-  return result;
-}
-
-void Cpu::InstructionDecode() {
-  vector<string> linha = this->split_instruction(active_instruction);
-
-  op = instruction_map[linha[0]];
-
-  if (linha[1] != "!") {
-    set_register(1, stoi(linha[1]));
-    register_bank.set_dirty(1);
-  }
-
-  if (linha[2] != "!") {
-    set_register(2, stoi(linha[2]));
-    register_bank.set_dirty(2);
-  }
-
-  if (linha[3] != "!") {
-    set_register(3, stoi(linha[3]));
-    register_bank.set_dirty(3);
-  }
-}
-
-void Cpu::Execute()  // Unidade de controle
-{
-  switch (op) {
-    case ADD: {
-      write_value =
-          ula.add(get_register(get_register(2)), get_register(get_register(3)));
-
-      write_data = true;
-      break;
-    }
-    case SUB: {
-      write_value =
-          ula.sub(get_register(get_register(2)), get_register(get_register(3)));
-
-      write_data = true;
-      break;
-    }
-    case MUL: {
-      write_value =
-          ula.mul(get_register(get_register(2)), get_register(get_register(3)));
-
-      write_data = true;
-      break;
-    }
-    case DIV: {
-      write_value =
-          ula.div(get_register(get_register(2)), get_register(get_register(3)));
-
-      write_data = true;
-      break;
-    }
-    case SLT: {
-      write_value =
-          get_register(get_register(2)) < get_register(get_register(3));
-
-      write_data = true;
-      break;
-    }
-    case BNE: {
-      if (get_register(get_register(2)) != get_register(get_register(1))) {
-        PC = get_register(3) - 1;
-      }
-      break;
-    }
-    case BEQ: {
-      if (get_register(get_register(2)) == get_register(get_register(1))) {
-        PC = get_register(3) - 1;
-      }
-      break;
-    }
-    case J: {
-      PC = get_register(1) - 1;
-      break;
-    }
-  }
-}
-
-void Cpu::MemoryAccess() {
-  switch (op) {
-    case LOAD: {
-      int address = get_register(2);
-      // write_value = cache->read(address);
-      write_value = ram->get_value(address);
-      logger->log_memory_operation("LOAD", address, write_value);
-      write_data = true;
-      break;
-    }
-    case ILOAD: {
-      write_value = get_register(2);
-      write_data = true;
-
-      break;
-    }
-    case STORE: {
-      int address = get_register(2);
-      int value = get_register(get_register(1));
-      // cache->write(address, value);
-      ram->set_value(address, value);
-      logger->log_memory_operation("STORE", address, value);
-      break;
-    }
-  }
-}
-
-void Cpu::WriteBack() {
-  if (!write_data) return;
-
-  set_register(get_register(1), write_value);
-  write_data = false;
 }

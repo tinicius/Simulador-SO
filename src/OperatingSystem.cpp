@@ -46,16 +46,10 @@ void OperatingSystem::init_cores() {
     ready_process[i] = -1;
   }
 
-  // pthread_t t_core[CORES_COUNT];
-
   for (int i = 0; i < CORES_COUNT; i++) {
     Cpu core(i, &ram, cache);
     cores.push_back(core);
   }
-
-  // for (int i = 0; i < CORES_COUNT; i++) {
-  //   pthread_create(&t_core[i], NULL, run_core, &cores[i]);
-  // }
 }
 
 bool OperatingSystem::check_finished() {

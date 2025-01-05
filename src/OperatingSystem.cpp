@@ -70,13 +70,11 @@ void OperatingSystem::log_processes_state() {
 
   for (int i = 0; i < PROGRAMS_COUNT; i++) {
     data_file << "Processo: " << i << endl;
-    data_file << "Cpu time: " << processes_map[i].cpu_time << " μm" << endl;
-    data_file << "Waiting time: " << processes_map[i].waiting_time << " μm"
-              << endl;
+    data_file << "Cpu time: " << processes_map[i].cpu_time << endl;
+    data_file << "Waiting time: " << processes_map[i].waiting_time << endl;
     data_file << "Timestamp: "
               << processes_map[i].cpu_time + processes_map[i].waiting_time
-              << " μm" << endl;
-    data_file << "State: " << processes_map[i].state << endl;
+              << endl;
 
     data_file << endl;
   }

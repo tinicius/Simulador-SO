@@ -64,7 +64,7 @@ bool OperatingSystem::check_finished() {
 }
 
 void OperatingSystem::log_processes_state() {
-  ofstream data_file("./output/process.log", ios::app);
+  ofstream data_file("./output/process.log");
 
   data_file << endl << endl;
 

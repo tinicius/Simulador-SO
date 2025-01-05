@@ -1,21 +1,67 @@
 #include "Bootloader.hpp"
 
-Bootloader::Bootloader() {
-  for (int i = 0; i < PROGRAMS_COUNT; i++) {
-    ifstream codigo("./dataset/codigo" + to_string(i + 1) + ".txt");
+vector<int> Bootloader::boot(Ram* ram, string directory) {
+  this->validate_directory(directory);
+  this->load_programs(directory);
 
-    vector<string> program;
-    string temp;
+  processes_map.resize(PROGRAMS_COUNT);
 
-    while (getline(codigo, temp)) program.push_back(temp);
+  vector<int> processes_pids;
 
-    if (program.size() == 0) {
-      cout << "Invalid program" << endl;
+  for (int i = 0; i < (int)this->programs.size(); i++) {
+    ram->insert_program(this->programs[i]);
+
+    auto pcb = this->get_pcb(i, i, this->programs[i].size());
+    ram->insert_PCB(pcb);
+
+    auto process = this->get_process(i, i);
+    processes_map[i] = process;
+
+    processes_pids.push_back(i);
+  }
+
+  return processes_pids;
+};
+
+void Bootloader::validate_directory(string directory) {
+  if (!fs::exists(directory) || !fs::is_directory(directory)) {
+    cerr << "O diretório não existe ou não é válido." << endl;
+    exit(1);
+  }
+
+  if (distance(fs::directory_iterator(directory), fs::directory_iterator{}) !=
+      PROGRAMS_COUNT) {
+    cerr << "Número de programas inválido!" << endl;
+    exit(1);
+  }
+}
+
+void Bootloader::load_programs(string directory) {
+  for (const auto& entry : fs::directory_iterator(directory)) {
+    if (!fs::is_regular_file(entry)) {
+      cerr << "Apenas arquivos regulares são suportados. Arquivo: " << entry
+           << endl;
       exit(1);
     }
 
-    this->programs.push_back(program);
+    this->load_program(entry.path().string());
   }
+}
+
+void Bootloader::load_program(string path) {
+  ifstream codigo(path);
+
+  vector<string> program;
+  string temp;
+
+  while (getline(codigo, temp)) program.push_back(temp);
+
+  if (program.size() == 0) {
+    cout << "Invalid program:" << path << endl;
+    exit(1);
+  }
+
+  this->programs.push_back(program);
 }
 
 Process Bootloader::get_process(int pid, int pcb_address) {
@@ -38,17 +84,6 @@ Process Bootloader::get_process(int pid, int pcb_address) {
   return process;
 }
 
-vector<Process> Bootloader::get_processes() {
-  vector<Process> processes;
-
-  for (int i = 0; i < (int)programs.size(); i++) {
-    Process process = get_process(i, i);
-    processes.push_back(process);
-  }
-
-  return processes;
-}
-
 ProcessControlBlock Bootloader::get_pcb(int pid, int program_address,
                                         int program_size) {
   ProcessControlBlock pcb;
@@ -62,16 +97,3 @@ ProcessControlBlock Bootloader::get_pcb(int pid, int program_address,
 
   return pcb;
 }
-
-vector<ProcessControlBlock> Bootloader::get_pcbs() {
-  vector<ProcessControlBlock> pcbs;
-
-  for (int i = 0; i < (int)programs.size(); i++) {
-    ProcessControlBlock pcb = get_pcb(i, i, programs[i].size());
-    pcbs.push_back(pcb);
-  }
-
-  return pcbs;
-}
-
-vector<vector<string>> Bootloader::get_programs() { return this->programs; }

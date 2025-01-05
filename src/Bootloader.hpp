@@ -1,14 +1,19 @@
 #ifndef BOOT_LOADER_HPP
 #define BOOT_LOADER_HPP
 
+#include <chrono>
+#include <filesystem>
 #include <fstream>
+#include <iostream>
 #include <string>
 #include <vector>
-#include <iostream>
-#include <chrono>
 
 #include "entities.hpp"
 #include "globals.hpp"
+
+using namespace std;
+
+namespace fs = filesystem;
 
 class Bootloader {
  private:
@@ -17,12 +22,13 @@ class Bootloader {
   Process get_process(int pid, int pcb_address);
   ProcessControlBlock get_pcb(int pid, int program_address, int program_size);
 
- public:
-  Bootloader();
+  void validate_directory(string directory);
 
-  vector<Process> get_processes();
-  vector<ProcessControlBlock> get_pcbs();
-  vector<vector<string>> get_programs();
+  void load_programs(string directory);
+  void load_program(string path);
+
+ public:
+  vector<int> boot(Ram* ram, string directory);
 };
 
 #endif

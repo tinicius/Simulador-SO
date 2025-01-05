@@ -30,8 +30,6 @@ class Cpu {
   ControlUnit control_unit;
   PipelineMips pipeline;
 
-  MemoryLogger* logger;
-
   int PC;
   RegisterBank register_bank;
   bool write_data;
@@ -52,7 +50,6 @@ class Cpu {
     this->cache = cpu.cache;
     this->ram = cpu.ram;
 
-    this->logger = cpu.logger;
     this->write_data = false;
   };
 

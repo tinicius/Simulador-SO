@@ -1,32 +1,16 @@
 #include "OperatingSystem.hpp"
 
-OperatingSystem::OperatingSystem() : ram(Ram()), scheduler(Scheduler()) {
-  this->cache = new Cache(&ram);
-
-  MemoryLogger::create_instance(&ram, cache);
+OperatingSystem::OperatingSystem(MemoryLogger *memory_logger,
+                                 vector<Cpu> &cores)
+    : memory_logger(memory_logger), cores(cores), scheduler(Scheduler()) {
   CpuLogger::configure_logger();
 }
 
-OperatingSystem::~OperatingSystem() { delete cache; }
+OperatingSystem::~OperatingSystem() {}
 
-void OperatingSystem::boot() {
-  processes_map.resize(PROGRAMS_COUNT);
-
-  // Carregando programas
-  Bootloader bootloader;
-
-  auto programs = bootloader.get_programs();
-  auto processes = bootloader.get_processes();
-  auto pcbs = bootloader.get_pcbs();
-
-  for (int i = 0; i < PROGRAMS_COUNT; i++) {
-    ram.insert_program(programs[i]);
-    ram.insert_PCB(pcbs[i]);
-
-    processes_map[i] = processes[i];
-
-    scheduler.add_ready(processes[i].pid);
-  }
+void OperatingSystem::boot(vector<int> &pids) {
+  // Inicializando processos prontos
+  for (auto pid : pids) scheduler.add_ready(pid);
 
   // Inicilizando as threads de CPU
   this->init_cores();
@@ -45,11 +29,6 @@ void OperatingSystem::init_cores() {
   for (int i = 0; i < CORES_COUNT; i++) {
     pthread_mutex_init(&core_mutex[i], NULL);
     ready_process[i] = -1;
-  }
-
-  for (int i = 0; i < CORES_COUNT; i++) {
-    Cpu core(i, &ram, cache);
-    cores.push_back(core);
   }
 }
 
@@ -84,22 +63,23 @@ void OperatingSystem::log_processes_state() {
   data_file.close();
 }
 
+void OperatingSystem::log_final() {
+  log_processes_state();
+
+  this->memory_logger->print();
+
+  CpuLogger::print();
+}
+
+Cpu *OperatingSystem::get_core(int core_id) { return &this->cores[core_id]; }
+
 void *run_os(void *arg) {
   OperatingSystem *os = (OperatingSystem *)arg;
 
   while (true) {
     // Verifica se todos os processos terminaram
     if (os->check_finished()) {
-      auto logger = MemoryLogger::get_instance();
-      logger->log_final_state();
-      logger->close_log_file();
-
-      MemoryLogger::delete_instance();
-
-      os->log_processes_state();
-
-      CpuLogger::print();
-
+      os->log_final();
       pthread_exit(NULL);
     }
 
@@ -126,7 +106,7 @@ void *run_os(void *arg) {
       }
 
       args->pid = next_pid;
-      args->cpu = &os->cores[i];
+      args->cpu = os->get_core(i);
 
       pthread_t t_core;
       pthread_create(&t_core, NULL, run_core, args);

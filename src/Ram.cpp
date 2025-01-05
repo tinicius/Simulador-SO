@@ -2,7 +2,9 @@
 
 Ram::Ram() { this->free_space.resize(32, 0); }
 
-void Ram::insert_program(vector<string> program) { this->programs.push_back(program); }
+void Ram::insert_program(vector<string> program) {
+  this->programs.push_back(program);
+}
 
 void Ram::insert_PCB(ProcessControlBlock PCB) { this->PCBs.push_back(PCB); }
 

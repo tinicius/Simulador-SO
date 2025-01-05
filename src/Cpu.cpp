@@ -8,7 +8,6 @@ Cpu::Cpu(int id, Ram* ram, Cache* cache)
       ram(ram),
       control_unit(this),
       pipeline(&control_unit),
-      logger(MemoryLogger::get_instance()),
       write_data(false) {}
 
 int Cpu::get_id() { return id; }

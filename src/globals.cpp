@@ -2,6 +2,7 @@
 
 int PROGRAMS_COUNT;
 int CORES_COUNT;
+bool LOGS_ENABLED = true;
 
 vector<int> ready_process;
 

@@ -47,11 +47,23 @@ bool Cpu::get_write_data() { return write_data; }
 
 void Cpu::set_write_data(bool value) { write_data = value; }
 
+void Cpu::log(const string& message) {
+  if (LOGS_ENABLED) CpuLogger::log(id, message);
+}
+
+void Cpu::log_all(const string& message) {
+  if (LOGS_ENABLED) CpuLogger::log_all(message);
+}
+
 void* run_core(void* args) {
   CpuThreadArgs* cpu_thread_args = (CpuThreadArgs*)args;
 
   Cpu* cpu = cpu_thread_args->cpu;
   int pid = cpu_thread_args->pid;
+
+  cpu->log("Process " + to_string(pid) + " started");
+  cpu->log_all("Process " + to_string(pid) + " started at core " +
+               to_string(cpu->get_id()));
 
   cpu_history[cpu->get_id()].push_back(pid);
   process_history[pid].push_back(cpu->get_id());
@@ -114,7 +126,8 @@ void* run_core(void* args) {
 
       cpu->get_ram()->update_PCB(process.pcb_address, cpu->actual_pcb);
 
-      cout << "Process " << process.pid << " finished!" << endl;
+      cpu->log("Process " + to_string(pid) + " finished");
+      cpu->log_all("Process " + to_string(pid) + " finished");
       break;
     }
 
@@ -139,6 +152,8 @@ void* run_core(void* args) {
       // Adiciona processo na fila de prontos
       ready_process[cpu->get_id()] = process.pid;
 
+      cpu->log("Quantum expired for process " + to_string(pid));
+      cpu->log_all("Quantum expired for process " + to_string(pid));
       break;
     }
   }

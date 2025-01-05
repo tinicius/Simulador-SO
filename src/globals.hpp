@@ -17,6 +17,7 @@ using namespace std;
 
 extern int PROGRAMS_COUNT;
 extern int CORES_COUNT;
+extern bool LOGS_ENABLED;
 
 extern vector<int> ready_process;
 

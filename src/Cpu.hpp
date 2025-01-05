@@ -7,6 +7,7 @@
 #include <sstream>
 
 #include "Cache.hpp"
+#include "CpuLogger.hpp"
 #include "MemoryLogger.hpp"
 #include "PipelineMips.hpp"
 #include "Ram.hpp"
@@ -38,8 +39,6 @@ class Cpu {
   int op;
 
   chrono::_V2::system_clock::time_point start;
-
-  vector<string> split_instruction(string instruction);
 
  public:
   ProcessControlBlock actual_pcb;
@@ -79,6 +78,9 @@ class Cpu {
 
   bool get_write_data();
   void set_write_data(bool value);
+
+  void log(const string& message);
+  void log_all(const string& message);
 };
 
 typedef struct CpuThreadArgs {

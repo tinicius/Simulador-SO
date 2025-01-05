@@ -29,7 +29,7 @@ MemoryLogger* MemoryLogger::get_instance() {
 }
 
 void MemoryLogger::open_log_file() {
-  log_file.open("./out/memory_operations.log", ios::trunc);
+  log_file.open("./output/memory_operations.log", ios::trunc);
   log_file << "\n=== New Execution Session ===" << endl;
 }
 
@@ -76,14 +76,14 @@ void MemoryLogger::log_final_state() {
   }
 
   // Print Cache contents
-  log_file << "\nCache Contents:" << endl;
-  for (int i = 0; i < CACHE_SIZE; i++) {
-    CacheBlock block = cache->get_block(i);
-    if (cache && block.valid) {
-      log_file << "Block " << setw(2) << i << ": Tag=" << block.tag
-               << " Data=" << block.data << " Dirty=" << block.dirty << endl;
-    }
-  }
+  // log_file << "\nCache Contents:" << endl;
+  // for (int i = 0; i < CACHE_SIZE; i++) {
+  //   CacheBlock block = cache->get_block(i);
+  //   if (cache && block.valid) {
+  //     log_file << "Block " << setw(2) << i << ": Tag=" << block.tag
+  //              << " Data=" << block.data << " Dirty=" << block.dirty << endl;
+  //   }
+  // }
 
   log_file << "\n=== End of Memory State ===" << endl;
   log_file.flush();

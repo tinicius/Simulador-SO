@@ -8,7 +8,7 @@ vector<int> Bootloader::boot(Ram* ram, string directory) {
 
   vector<int> processes_pids;
 
-  for (int i = 0; i < (int)this->programs.size(); i++) {
+  for (int i = 0; i < PROGRAMS_COUNT; i++) {
     ram->insert_program(this->programs[i]);
 
     auto pcb = this->get_pcb(i, i, this->programs[i].size());
@@ -29,7 +29,7 @@ void Bootloader::validate_directory(string directory) {
     exit(1);
   }
 
-  if (distance(fs::directory_iterator(directory), fs::directory_iterator{}) !=
+  if (distance(fs::directory_iterator(directory), fs::directory_iterator{}) <
       PROGRAMS_COUNT) {
     cerr << "Número de programas inválido!" << endl;
     exit(1);

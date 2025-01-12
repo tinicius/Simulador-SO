@@ -2,15 +2,21 @@
 
 OperatingSystem::OperatingSystem(MemoryLogger *memory_logger,
                                  vector<Cpu> &cores)
-    : memory_logger(memory_logger), cores(cores), scheduler(Scheduler()) {
+    : memory_logger(memory_logger), cores(cores), scheduler(nullptr) {
+  PoliticFIFO *politic = new PoliticFIFO();
+
+  this->scheduler = new Scheduler(politic);
+
   CpuLogger::configure_logger();
 }
 
-OperatingSystem::~OperatingSystem() {}
+OperatingSystem::~OperatingSystem() {
+  delete this->scheduler;
+}
 
 void OperatingSystem::boot(vector<int> &pids) {
   // Inicializando processos prontos
-  for (auto pid : pids) scheduler.add_ready(pid);
+  for (auto pid : pids) scheduler->add_ready(pid);
 
   // Inicilizando as threads de CPU
   this->init_cores();
@@ -87,11 +93,11 @@ void *run_os(void *arg) {
       if (pthread_mutex_trylock(&core_mutex[i]) != 0) continue;
 
       if (ready_process[i] != -1) {
-        os->scheduler.add_ready(ready_process[i]);
+        os->scheduler->add_ready(ready_process[i]);
         ready_process[i] = -1;
       }
 
-      int next_pid = os->scheduler.get_next_process_pid();
+      int next_pid = os->scheduler->get_next_process_pid();
 
       if (next_pid == -1) {
         pthread_mutex_unlock(&core_mutex[i]);

@@ -2,17 +2,12 @@
 
 using namespace std;
 
-Scheduler::Scheduler() {}
+Scheduler::Scheduler(Politic* politic) { this->politic = politic; }
 
 int Scheduler::get_next_process_pid() {
-  if (this->ready.size() == 0) return -1;
-
-  int pid = this->ready.front();
-  this->ready.pop_front();
-
-  return pid;
+  return this->politic->get_next_process_pid();
 }
 
-void Scheduler::add_ready(int pid) { this->ready.push_back(pid); }
+void Scheduler::add_ready(int pid) { this->politic->add_ready(pid); }
 
-int Scheduler::get_ready_size() { return this->ready.size(); }
+int Scheduler::get_ready_size() { return this->politic->get_ready_size(); }

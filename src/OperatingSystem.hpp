@@ -8,6 +8,7 @@
 #include "Cpu.hpp"
 #include "Scheduler.hpp"
 #include "globals.hpp"
+#include "PoliticFIFO.hpp"
 
 using namespace std;
 
@@ -20,7 +21,7 @@ class OperatingSystem {
   OperatingSystem(MemoryLogger* memory_logger, vector<Cpu>& cores);
   ~OperatingSystem();
 
-  Scheduler scheduler;
+  Scheduler* scheduler;
 
   void boot(vector<int>& pids);
 

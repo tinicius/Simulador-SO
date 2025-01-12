@@ -7,6 +7,7 @@
 #include <iostream>
 #include <list>
 
+#include "Politic.hpp"
 #include "entities.hpp"
 
 using namespace std;
@@ -15,10 +16,11 @@ extern pthread_mutex_t running_mutex;
 
 class Scheduler {
  private:
-  list<int> ready;  // PIDs of ready processes
+  Politic *politic;
 
  public:
-  Scheduler();
+  Scheduler(Politic *politic);
+  ~Scheduler() { delete politic; }
 
   int get_next_process_pid();
 

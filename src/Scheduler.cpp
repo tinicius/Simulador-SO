@@ -9,7 +9,7 @@ int Scheduler::get_next_process_pid() {
 
   if (next_pid == -1) return next_pid;
 
-  processes_map[next_pid].quantum = 200;
+  processes_map[next_pid].quantum = QUANTUM;
 
   return next_pid;
 }

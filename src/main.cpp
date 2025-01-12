@@ -18,6 +18,11 @@ void menu() {
   cout << "Digite o número de núcleos: ";
   cin >> CORES_COUNT;
 
+  cout << "Digte o quantum (em número de instruções): ";
+  cin >> QUANTUM;
+
+  QUANTUM *= 5;
+
   cout << endl;
 
   cout << "[1] FCFS (First Come First Service)" << endl;

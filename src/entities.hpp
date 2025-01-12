@@ -26,6 +26,8 @@ typedef struct Process {
   long waiting_time = 0;
   long cpu_time = 0;
 
+  int size = 0;
+
   ProcessState state;
 } Process;
 

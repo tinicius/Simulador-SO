@@ -15,6 +15,7 @@ vector<int> Bootloader::boot(Ram* ram, string directory) {
     ram->insert_PCB(pcb);
 
     auto process = this->get_process(i, i);
+    process.size = pcb.program_size;
     processes_map[i] = process;
 
     processes_pids.push_back(i);

@@ -9,6 +9,7 @@
 #include "Scheduler.hpp"
 #include "globals.hpp"
 #include "PoliticFCFS.hpp"
+#include "PoliticSJF.hpp"
 
 using namespace std;
 

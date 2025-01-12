@@ -7,8 +7,8 @@
 
 #include "Cpu.hpp"
 #include "PolicySRTN.hpp"
-#include "PoliticFCFS.hpp"
-#include "PoliticSJF.hpp"
+#include "PolicyFCFS.hpp"
+#include "PolicySJF.hpp"
 #include "Scheduler.hpp"
 #include "globals.hpp"
 
@@ -37,7 +37,7 @@ class OperatingSystem {
 
   Cpu* get_core(int core_id);
 
-  Politic* get_politic();
+  Policy* get_policy();
 };
 
 void* run_os(void* arg);

@@ -7,7 +7,7 @@
 #include <iostream>
 #include <list>
 
-#include "Politic.hpp"
+#include "Policy.hpp"
 #include "entities.hpp"
 #include "globals.hpp"
 
@@ -17,11 +17,11 @@ extern pthread_mutex_t running_mutex;
 
 class Scheduler {
  private:
-  Politic *politic;
+  Policy *policy;
 
  public:
-  Scheduler(Politic *politic);
-  ~Scheduler() { delete politic; }
+  Scheduler(Policy *policy);
+  ~Scheduler() { delete policy; }
 
   int get_next_process_pid();
 

@@ -1,9 +1,9 @@
-#ifndef POLITIC_HPP
-#define POLITIC_HPP
+#ifndef POLICY_HPP
+#define POLICY_HPP
 
-class Politic {
+class Policy {
  public:
-  virtual ~Politic() {};
+  virtual ~Policy() {};
 
   virtual int get_next_process_pid() = 0;
   virtual void add_ready(int pid) = 0;

@@ -1,6 +1,6 @@
-#include "PoliticSJF.hpp"
+#include "PolicySJF.hpp"
 
-int PoliticSJF::get_next_process_pid() {
+int PolicySJF::get_next_process_pid() {
   if (ready.empty()) return -1;
 
   int min_size = 1e9;
@@ -20,6 +20,6 @@ int PoliticSJF::get_next_process_pid() {
   return pid;
 }
 
-void PoliticSJF::add_ready(int pid) { ready.push_back(pid); }
+void PolicySJF::add_ready(int pid) { ready.push_back(pid); }
 
-int PoliticSJF::get_ready_size() { return ready.size(); }
+int PolicySJF::get_ready_size() { return ready.size(); }

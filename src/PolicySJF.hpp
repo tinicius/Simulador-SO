@@ -1,14 +1,14 @@
-#ifndef POLITIC_SJF_HPP
-#define POLITIC_SJF_HPP
+#ifndef POLICY_SJF_HPP
+#define POLICY_SJF_HPP
 
 #include <list>
 
-#include "Politic.hpp"
+#include "Policy.hpp"
 #include "globals.hpp"
 
 using namespace std;
 
-class PoliticSJF : public Politic {
+class PolicySJF : public Policy {
  private:
   list<int> ready;
 

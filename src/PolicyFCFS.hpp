@@ -1,13 +1,13 @@
-#ifndef POLITIC_FCFS_HPP
-#define POLITIC_FCFS_HPP
+#ifndef POLICY_FCFS_HPP
+#define POLICY_FCFS_HPP
 
 #include <queue>
 
-#include "Politic.hpp"
+#include "Policy.hpp"
 
 using namespace std;
 
-class PoliticFCFS : public Politic {
+class PolicyFCFS : public Policy {
  private:
   queue<int> ready;
 

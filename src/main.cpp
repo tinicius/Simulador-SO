@@ -30,6 +30,11 @@ void menu() {
   cout << "Escolha uma política de escalonamento: ";
   cin >> POLICY;
 
+  if (POLICY < 1 || POLICY > 3) {
+    cout << "Política inválida. Encerrando o programa." << endl;
+    exit(1);
+  }
+
   cout << "==========================" << endl;
   cout << endl;
 }

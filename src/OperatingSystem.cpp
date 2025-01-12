@@ -3,9 +3,9 @@
 OperatingSystem::OperatingSystem(MemoryLogger *memory_logger,
                                  vector<Cpu> &cores)
     : memory_logger(memory_logger), cores(cores), scheduler(nullptr) {
-  Politic *politic = this->get_politic();
+  Policy *policy = this->get_policy();
 
-  this->scheduler = new Scheduler(politic);
+  this->scheduler = new Scheduler(policy);
 
   CpuLogger::configure_logger();
 }
@@ -77,12 +77,12 @@ void OperatingSystem::log_final() {
 
 Cpu *OperatingSystem::get_core(int core_id) { return &this->cores[core_id]; }
 
-Politic *OperatingSystem::get_politic() {
+Policy *OperatingSystem::get_policy() {
   switch (POLICY) {
     case 1:
-      return new PoliticFCFS();
+      return new PolicyFCFS();
     case 2:
-      return new PoliticSJF();
+      return new PolicySJF();
     case 3:
       return new PolicySRTN();
   }

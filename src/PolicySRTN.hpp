@@ -3,12 +3,12 @@
 
 #include <list>
 
-#include "Politic.hpp"
+#include "Policy.hpp"
 #include "globals.hpp"
 
 using namespace std;
 
-class PolicySRTN : public Politic {
+class PolicySRTN : public Policy {
  private:
   list<int> ready;
 

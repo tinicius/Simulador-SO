@@ -1,6 +1,8 @@
 #include "Bootloader.hpp"
 
 vector<int> Bootloader::boot(Ram* ram, string directory) {
+  cout << "========== Bootloader ==========" << endl;
+
   this->validate_directory(directory);
   this->load_programs(directory);
 
@@ -8,7 +10,8 @@ vector<int> Bootloader::boot(Ram* ram, string directory) {
 
   vector<int> processes_pids;
 
-  cout << "========== Bootloader ==========" << endl;
+  cout << "Processos" << endl;
+  cout << endl;
 
   for (int i = 0; i < PROGRAMS_COUNT; i++) {
     ram->insert_program(this->programs[i]);
@@ -23,7 +26,7 @@ vector<int> Bootloader::boot(Ram* ram, string directory) {
 
     processes_pids.push_back(i);
 
-    cout << "Programa " << i << " carregado." << endl;
+    cout << "PID: " << i << " carregado." << endl;
     cout << "Tamanho: " << pcb.program_size << endl;
     cout << endl;
   }
@@ -48,6 +51,11 @@ void Bootloader::validate_directory(string directory) {
 }
 
 void Bootloader::load_programs(string directory) {
+  cout << "Arquivos e PID" << endl;
+  cout << endl;
+
+  int i = 0;
+
   for (const auto& entry : fs::directory_iterator(directory)) {
     if (!fs::is_regular_file(entry)) {
       cerr << "Apenas arquivos regulares são suportados. Arquivo: " << entry
@@ -55,8 +63,16 @@ void Bootloader::load_programs(string directory) {
       exit(1);
     }
 
+    cout << "Arquivo: " << entry.path().string() << endl;
+    cout << "PID: " << i << endl;
+    cout << endl;
+
+    i++;
+
     this->load_program(entry.path().string());
   }
+
+  cout << endl;
 }
 
 void Bootloader::load_program(string path) {

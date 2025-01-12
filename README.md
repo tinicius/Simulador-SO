@@ -20,48 +20,80 @@ clear && make clean && make && make run
 
 ## Arquivos
 
-Os programas a serem executados devem ficar dentro da pasta `dataset` e seguir a nomenclatura `codigo$.txt`, substituindo **$** pelo índice do programa. 
+Os programas a serem executados devem ficar dentro da pasta `dataset` com a extensão `.txt`.
 
 ### Exemplo de um conjunto válido de programas:
 
-```bash
+```
 dataset/
-  codigo1.txt
-  codigo2.txt
-  codigo3.txt
+  code1.txt
+  code2.txt
+  code3.txt
+  sub.txt
+  sum.txt
 ```
 
-## Parâmetros
+## Exemplo
 
-Por padrão, o simulador irá executar com apenas **1 core**, buscar apenas **1 programa** (localizado no arquivo **`codigo1.txt`**) e definir um **quantum de 2 instruções**, ou seja, o valor 10 (considerando que cada instrução utiliza 5 ciclos de clock).
+Ao executar o código é exibido um menu para realizar alguamas configurações inicais.
 
-No entanto, é possível alterar o número de programas que serão carregados, o número de cores e o quantum. Para isso, é necessário adicionar uma variável ao comando de execução.
+```
+========== Menu ==========
+Digite o número de programas: 5
+Digite o número de núcleos: 3
 
-### Exemplo de variável de parâmetros:
+[1] FCFS (First Come First Service)
+[2] SJF (Shortest Job First)
+[3] SRTN (Shortest Remaining Time Next)
 
-```bash
-ARGS="$numero_de_programas $numero_de_cores $quantum"
+Escolha uma política de escalonamento: 2
+==========================
 ```
 
-Obs: Nessa versão do simulador o quantum deve ser múltiplo de 5.
+Depois são exibidos algumas informações sobre os programas carregados.
 
-### Exemplo de comando para executar 5 programas:
+```
+========== Bootloader ==========
+Arquivos e PID
 
-```bash
-clear && make clean && make && make run ARGS="5"
+Arquivo: ./dataset/code1.txt
+PID: 0
+
+Arquivo: ./dataset/sum.txt
+PID: 1
+
+Arquivo: ./dataset/code3.txt
+PID: 2
+
+Arquivo: ./dataset/sub.txt
+PID: 3
+
+Arquivo: ./dataset/code2.txt
+PID: 4
+
+
+Processos
+
+PID: 0 carregado.
+Tamanho: 4
+
+PID: 1 carregado.
+Tamanho: 4
+
+PID: 2 carregado.
+Tamanho: 12
+
+PID: 3 carregado.
+Tamanho: 4
+
+PID: 4 carregado.
+Tamanho: 8
+
+==============================
+
 ```
 
-### Exemplo de comando para executar 3 programas utilizando 2 cores:
-
-```bash
-clear && make clean && make && make run ARGS="3 2"
-```
-
-### Exemplo de comando para executar 4 programas utilizando 4 cores com quantum de 200:
-
-```bash
-clear && make clean && make && make run ARGS="4 4 200"
-```
+Ao fim da execução os resultados ficam disponíveis na pasta `output`.
 
 ## Autores
 - **Emanuel Vieira Tavares**:emanuel@aluno.cefetmg.br 

@@ -10,7 +10,6 @@
 #include "globals.hpp"
 
 void menu() {
-
   cout << "========== Menu ==========" << endl;
 
   cout << "Digite o número de programas: ";
@@ -20,17 +19,18 @@ void menu() {
   cin >> CORES_COUNT;
 
   cout << endl;
-  
+
   cout << "[1] FCFS (First Come First Service)" << endl;
   cout << "[2] SJF (Shortest Job First)" << endl;
   cout << "[3] SRTN (Shortest Remaining Time Next)" << endl;
+  cout << "[4] Round Robin" << endl;
 
   cout << endl;
 
   cout << "Escolha uma política de escalonamento: ";
   cin >> POLICY;
 
-  if (POLICY < 1 || POLICY > 3) {
+  if (POLICY < 1 || POLICY > 4) {
     cout << "Política inválida. Encerrando o programa." << endl;
     exit(1);
   }

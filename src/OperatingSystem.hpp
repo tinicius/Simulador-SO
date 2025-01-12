@@ -6,9 +6,10 @@
 #include <vector>
 
 #include "Cpu.hpp"
-#include "PolicySRTN.hpp"
 #include "PolicyFCFS.hpp"
+#include "PolicyRoundRobin.hpp"
 #include "PolicySJF.hpp"
+#include "PolicySRTN.hpp"
 #include "Scheduler.hpp"
 #include "globals.hpp"
 

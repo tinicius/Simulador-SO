@@ -85,6 +85,8 @@ Policy *OperatingSystem::get_policy() {
       return new PolicySJF();
     case 3:
       return new PolicySRTN();
+    case 4:
+      return new PolicyRoundRobin();
   }
 
   return nullptr;

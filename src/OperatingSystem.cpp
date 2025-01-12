@@ -3,7 +3,7 @@
 OperatingSystem::OperatingSystem(MemoryLogger *memory_logger,
                                  vector<Cpu> &cores)
     : memory_logger(memory_logger), cores(cores), scheduler(nullptr) {
-  PoliticFIFO *politic = new PoliticFIFO();
+  PoliticFCFS *politic = new PoliticFCFS();
 
   this->scheduler = new Scheduler(politic);
 

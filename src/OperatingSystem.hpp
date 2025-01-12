@@ -8,7 +8,7 @@
 #include "Cpu.hpp"
 #include "Scheduler.hpp"
 #include "globals.hpp"
-#include "PoliticFIFO.hpp"
+#include "PoliticFCFS.hpp"
 
 using namespace std;
 

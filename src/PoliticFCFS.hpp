@@ -1,5 +1,5 @@
-#ifndef POLITIC_FIFO_HPP
-#define POLITIC_FIFO_HPP
+#ifndef POLITIC_FCFS_HPP
+#define POLITIC_FCFS_HPP
 
 #include <queue>
 
@@ -7,7 +7,7 @@
 
 using namespace std;
 
-class PoliticFIFO : public Politic {
+class PoliticFCFS : public Politic {
  private:
   queue<int> ready;
 

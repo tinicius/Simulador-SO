@@ -18,6 +18,7 @@ vector<int> Bootloader::boot(Ram* ram, string directory) {
 
     auto process = this->get_process(i, i);
     process.size = pcb.program_size;
+    process.remaining_instructions = pcb.program_size;
     processes_map[i] = process;
 
     processes_pids.push_back(i);

@@ -3,16 +3,14 @@
 OperatingSystem::OperatingSystem(MemoryLogger *memory_logger,
                                  vector<Cpu> &cores)
     : memory_logger(memory_logger), cores(cores), scheduler(nullptr) {
-  PoliticFCFS *politic = new PoliticFCFS();
+  Politic *politic = this->get_politic();
 
   this->scheduler = new Scheduler(politic);
 
   CpuLogger::configure_logger();
 }
 
-OperatingSystem::~OperatingSystem() {
-  delete this->scheduler;
-}
+OperatingSystem::~OperatingSystem() { delete this->scheduler; }
 
 void OperatingSystem::boot(vector<int> &pids) {
   // Inicializando processos prontos
@@ -78,6 +76,19 @@ void OperatingSystem::log_final() {
 }
 
 Cpu *OperatingSystem::get_core(int core_id) { return &this->cores[core_id]; }
+
+Politic *OperatingSystem::get_politic() {
+  switch (POLICY) {
+    case 1:
+      return new PoliticFCFS();
+    case 2:
+      return new PoliticSJF();
+    case 3:
+      return new PolicySRTN();
+  }
+
+  return nullptr;
+}
 
 void *run_os(void *arg) {
   OperatingSystem *os = (OperatingSystem *)arg;

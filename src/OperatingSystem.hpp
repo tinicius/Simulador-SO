@@ -6,10 +6,11 @@
 #include <vector>
 
 #include "Cpu.hpp"
-#include "Scheduler.hpp"
-#include "globals.hpp"
+#include "PolicySRTN.hpp"
 #include "PoliticFCFS.hpp"
 #include "PoliticSJF.hpp"
+#include "Scheduler.hpp"
+#include "globals.hpp"
 
 using namespace std;
 
@@ -35,6 +36,8 @@ class OperatingSystem {
   void log_final();
 
   Cpu* get_core(int core_id);
+
+  Politic* get_politic();
 };
 
 void* run_os(void* arg);

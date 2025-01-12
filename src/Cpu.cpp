@@ -99,6 +99,8 @@ void* run_core(void* args) {
 
     quantum -= 5;
 
+    process.remaining_instructions--;
+
     cpu->actual_pcb.PC = cpu->get_pc();
 
     // Atualizando registradores do PCB

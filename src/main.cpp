@@ -23,6 +23,7 @@ void menu() {
   
   cout << "[1] FCFS (First Come First Service)" << endl;
   cout << "[2] SJF (Shortest Job First)" << endl;
+  cout << "[3] SRTN (Shortest Remaining Time Next)" << endl;
 
   cout << endl;
 

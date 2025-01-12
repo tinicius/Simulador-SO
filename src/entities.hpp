@@ -30,6 +30,8 @@ typedef struct Process {
 
   int quantum = 0;
 
+  int remaining_instructions = 0;
+
   ProcessState state;
 } Process;
 

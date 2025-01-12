@@ -8,6 +8,8 @@ vector<int> Bootloader::boot(Ram* ram, string directory) {
 
   vector<int> processes_pids;
 
+  cout << "========== Bootloader ==========" << endl;
+
   for (int i = 0; i < PROGRAMS_COUNT; i++) {
     ram->insert_program(this->programs[i]);
 
@@ -19,7 +21,14 @@ vector<int> Bootloader::boot(Ram* ram, string directory) {
     processes_map[i] = process;
 
     processes_pids.push_back(i);
+
+    cout << "Programa " << i << " carregado." << endl;
+    cout << "Tamanho: " << pcb.program_size << endl;
+    cout << endl;
   }
+
+  cout << "==============================" << endl;
+  cout << endl;
 
   return processes_pids;
 };

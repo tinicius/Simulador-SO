@@ -2,7 +2,8 @@
 
 int PROGRAMS_COUNT;
 int CORES_COUNT;
-int QUANTUM;
+int QUANTUM = 20;  // Quantum em ciclos de clock
+int POLICY = 0;
 bool LOGS_ENABLED = true;
 
 vector<int> ready_process;

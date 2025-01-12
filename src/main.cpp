@@ -9,28 +9,33 @@
 #include "entities.hpp"
 #include "globals.hpp"
 
-void set_arguments(int program_count, int core_count, int quantum) {
-  PROGRAMS_COUNT = program_count;
-  CORES_COUNT = core_count;
-  QUANTUM = quantum;
+void menu() {
+
+  cout << "========== Menu ==========" << endl;
+
+  cout << "Digite o número de programas: ";
+  cin >> PROGRAMS_COUNT;
+
+  cout << "Digite o número de núcleos: ";
+  cin >> CORES_COUNT;
+
+  cout << endl;
+  
+  cout << "[1] FCFS (First Come First Service)" << endl;
+  cout << "[2] SJF (Shortest Job First)" << endl;
+
+  cout << endl;
+
+  cout << "Escolha uma política de escalonamento: ";
+  cin >> POLICY;
+
+  cout << "==========================" << endl;
+  cout << endl;
 }
 
 int main(int argc, char* argv[]) {
   // Definindo valores padrão
-  switch (argc) {
-    case 2:
-      set_arguments(stoi(argv[1]), 1, 10);
-      break;
-    case 3:
-      set_arguments(stoi(argv[1]), stoi(argv[2]), 10);
-      break;
-    case 4:
-      set_arguments(stoi(argv[1]), stoi(argv[2]), stoi(argv[3]));
-      break;
-    default:
-      set_arguments(1, 1, 10);
-      break;
-  }
+  menu();
 
   cpu_history.resize(CORES_COUNT);
   process_history.resize(PROGRAMS_COUNT);

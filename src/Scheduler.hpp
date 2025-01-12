@@ -9,6 +9,7 @@
 
 #include "Politic.hpp"
 #include "entities.hpp"
+#include "globals.hpp"
 
 using namespace std;
 

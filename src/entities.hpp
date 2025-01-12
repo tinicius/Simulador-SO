@@ -28,6 +28,8 @@ typedef struct Process {
 
   int size = 0;
 
+  int quantum = 0;
+
   ProcessState state;
 } Process;
 

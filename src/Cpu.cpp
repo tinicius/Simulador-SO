@@ -78,7 +78,7 @@ void* run_core(void* args) {
   process.waiting_time += start_in_nano - process.start_time;
 
   // Inicializando quantum
-  int quantum = 0;
+  int quantum = process.quantum;
 
   // Buscar PCB na RAM
   cpu->actual_pcb = cpu->get_ram()->get_PCB(process.pcb_address);
@@ -97,7 +97,7 @@ void* run_core(void* args) {
     pipeline->memory_access();
     pipeline->write_back();
 
-    quantum += 5;
+    quantum -= 5;
 
     cpu->actual_pcb.PC = cpu->get_pc();
 
@@ -131,7 +131,7 @@ void* run_core(void* args) {
     }
 
     // Verifica se quantum expirou
-    if (quantum >= QUANTUM) {
+    if (quantum == 0) {
       auto end = chrono::high_resolution_clock::now();
       auto duration = chrono::duration_cast<chrono::microseconds>(end - start);
 

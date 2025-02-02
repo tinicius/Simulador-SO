@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 
+#include "Ram.hpp"
 #include "entities.hpp"
 #include "globals.hpp"
 

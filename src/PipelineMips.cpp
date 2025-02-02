@@ -8,7 +8,8 @@ PipelineMips::PipelineMips(ControlUnit* control_unit) {
                            {"MUL", MUL}};
 }
 
-bool PipelineMips::instruction_fetch(int pc, int program_address, int program_size) {
+bool PipelineMips::instruction_fetch(int pc, int program_address,
+                                     int program_size) {
   if (pc >= program_size) return false;
 
   active_instruction = control_unit->get_instruction(program_address, pc);

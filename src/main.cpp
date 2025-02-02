@@ -1,6 +1,8 @@
 #include <vector>
 
 #include "Bootloader.hpp"
+#include "CacheFIFO.hpp"
+#include "CacheLRU.hpp"
 #include "Cpu.hpp"
 #include "CpuLogger.hpp"
 #include "MemoryLogger.hpp"
@@ -18,8 +20,11 @@ void menu() {
   cout << "Digite o número de núcleos: ";
   cin >> CORES_COUNT;
 
-  cout << "Digte o quantum (em número de instruções): ";
+  cout << "Digite o quantum (em número de instruções): ";
   cin >> QUANTUM;
+
+  cout << "Digite o tamanho da cache (em número de instruções): ";
+  cin >> CACHE_SIZE;
 
   QUANTUM *= 5;
 
@@ -40,8 +45,33 @@ void menu() {
     exit(1);
   }
 
+  cout << endl;
+
+  cout << "[1] FIFO" << endl;
+  cout << "[2] LRU" << endl;
+
+  cout << endl;
+
+  cout << "Escolha o tipo da cache: ";
+  cin >> CACHE_TYPE;
+
+  if (CACHE_TYPE < 1 || CACHE_TYPE > 2) {
+    cout << "Tipo inválido. Encerrando o programa." << endl;
+    exit(1);
+  }
+
+  cout << endl;
+
   cout << "==========================" << endl;
   cout << endl;
+}
+
+CacheType* get_cache_type() {
+  if (CACHE_TYPE == 1) {
+    return new CacheFIFO();
+  } else {
+    return new CacheLRU();
+  }
 }
 
 int main(int argc, char* argv[]) {
@@ -53,7 +83,9 @@ int main(int argc, char* argv[]) {
 
   // Inicializando o hardware
   Ram ram;
-  Cache cache(&ram);
+
+  CacheType* cache_type = get_cache_type();
+  Cache cache(cache_type);
 
   vector<Cpu> cores;
 

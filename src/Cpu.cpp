@@ -19,7 +19,14 @@ PipelineMips* Cpu::get_pipeline() { return &pipeline; }
 ULA* Cpu::get_ula() { return &ula; }
 
 string Cpu::get_instruction(int program_address, int PC) {
-  return ram->get_instruction(program_address, PC);
+  string cached_instruction = cache->get_instruction(program_address, PC);
+
+  if (cached_instruction != "") return cached_instruction;
+
+  string instruction = ram->get_instruction(program_address, PC);
+  cache->add_instruction(program_address, PC, instruction);
+
+  return instruction;
 }
 
 int Cpu::get_pc() { return PC; }
@@ -128,7 +135,8 @@ void* run_core(void* args) {
       cpu->get_ram()->update_PCB(process.pcb_address, cpu->actual_pcb);
 
       cpu->log("Process " + to_string(pid) + " finished");
-      cpu->log_all("Process " + to_string(pid) + " finished");
+      cpu->log_all("Process " + to_string(pid) + " finished at time " +
+                   to_string(end_in_nano));
       break;
     }
 

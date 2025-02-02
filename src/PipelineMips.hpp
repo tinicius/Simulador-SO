@@ -1,6 +1,7 @@
 #ifndef PIPELINE_MIPS_HPP
 #define PIPELINE_MIPS_HPP
 
+#include <iostream>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -13,7 +14,7 @@ class PipelineMips {
  public:
   PipelineMips(ControlUnit* control_unit);
 
-  ~PipelineMips() {  }
+  ~PipelineMips() {}
 
   bool instruction_fetch(int pc, int program_address, int program_size);
   void instruction_decode();

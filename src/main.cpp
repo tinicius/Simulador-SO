@@ -47,18 +47,24 @@ void menu() {
 
   cout << endl;
 
-  cout << "[1] FIFO" << endl;
-  cout << "[2] LRU" << endl;
+  cout << "[1] Nenhum" << endl;
+  cout << "[2] FIFO" << endl;
+  cout << "[3] LRU" << endl;
 
   cout << endl;
 
   cout << "Escolha o tipo da cache: ";
   cin >> CACHE_TYPE;
 
-  if (CACHE_TYPE < 1 || CACHE_TYPE > 2) {
+  if (CACHE_TYPE < 1 || CACHE_TYPE > 3) {
     cout << "Tipo inválido. Encerrando o programa." << endl;
     exit(1);
   }
+
+  cout << endl;
+
+  cout << "Agrupar jobs semelhantes? ([0] Não [1] Sim ): ";
+  cin >> ENABLED_GROUPING;
 
   cout << endl;
 
@@ -67,10 +73,16 @@ void menu() {
 }
 
 CacheType* get_cache_type() {
-  if (CACHE_TYPE == 1) {
-    return new CacheFIFO();
-  } else {
-    return new CacheLRU();
+  switch (CACHE_TYPE) {
+    case 1:
+      return nullptr;
+    case 2:
+      return new CacheFIFO();
+    case 3:
+      return new CacheLRU();
+
+    default:
+      return nullptr;
   }
 }
 
@@ -90,6 +102,11 @@ int main(int argc, char* argv[]) {
   vector<Cpu> cores;
 
   for (int i = 0; i < CORES_COUNT; i++) {
+    if (CACHE_TYPE == 1) {
+      cores.push_back(Cpu(i, &ram));
+      continue;
+    }
+
     cores.push_back(Cpu(i, &ram, &cache));
   }
 

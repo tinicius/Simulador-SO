@@ -6,6 +6,9 @@ int QUANTUM;
 int POLICY;
 int CACHE_TYPE;
 int CACHE_SIZE;
+int ENABLED_GROUPING;
+int CACHE_HIT;
+int CACHE_MISS;
 bool LOGS_ENABLED = true;
 
 vector<int> ready_process;

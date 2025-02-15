@@ -42,6 +42,7 @@ class Cpu {
   ProcessControlBlock actual_pcb;
 
   Cpu(int id, Ram* ram, Cache* cache);
+  Cpu(int id, Ram* ram);
 
   Cpu(const Cpu& cpu) : control_unit(this), pipeline(&control_unit) {
     this->pipeline = PipelineMips(&this->control_unit);

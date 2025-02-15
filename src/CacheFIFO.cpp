@@ -3,13 +3,17 @@
 string CacheFIFO::get_instruction(int program_address, int pc) {
   pthread_mutex_lock(&cache_mutex);
 
+  usleep(100);
+
   auto find = instructions.find(make_pair(program_address, pc));
 
   if (find == instructions.end()) {
+    CACHE_MISS++;
     pthread_mutex_unlock(&cache_mutex);
     return "";
   }
 
+  CACHE_HIT++;
   pthread_mutex_unlock(&cache_mutex);
 
   return find->second;

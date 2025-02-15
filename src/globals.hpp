@@ -19,6 +19,9 @@ extern int QUANTUM;  // Quantum em ciclos de clock
 extern int POLICY;
 extern int CACHE_TYPE;
 extern int CACHE_SIZE;
+extern int ENABLED_GROUPING;
+extern int CACHE_HIT;
+extern int CACHE_MISS;
 extern bool LOGS_ENABLED;
 
 extern vector<int> ready_process;

@@ -10,6 +10,14 @@ Cpu::Cpu(int id, Ram* ram, Cache* cache)
       pipeline(&control_unit),
       write_data(false) {}
 
+Cpu::Cpu(int id, Ram* ram)
+    : id(id),
+      cache(nullptr),
+      ram(ram),
+      control_unit(this),
+      pipeline(&control_unit),
+      write_data(false) {}
+
 int Cpu::get_id() { return id; }
 
 Ram* Cpu::get_ram() { return ram; }
@@ -19,6 +27,8 @@ PipelineMips* Cpu::get_pipeline() { return &pipeline; }
 ULA* Cpu::get_ula() { return &ula; }
 
 string Cpu::get_instruction(int program_address, int PC) {
+  if (cache == nullptr) return ram->get_instruction(program_address, PC);
+
   string cached_instruction = cache->get_instruction(program_address, PC);
 
   if (cached_instruction != "") return cached_instruction;

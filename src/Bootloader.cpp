@@ -8,8 +8,6 @@ vector<int> Bootloader::boot(Ram* ram, string directory) {
 
   processes_map.resize(PROGRAMS_COUNT);
 
-  vector<int> processes_pids;
-
   cout << "Processos" << endl;
   cout << endl;
 
@@ -24,8 +22,6 @@ vector<int> Bootloader::boot(Ram* ram, string directory) {
     process.remaining_instructions = pcb.program_size;
     processes_map[i] = process;
 
-    processes_pids.push_back(i);
-
     cout << "PID: " << i << " carregado." << endl;
     cout << "Tamanho: " << pcb.program_size << endl;
     cout << endl;
@@ -34,8 +30,30 @@ vector<int> Bootloader::boot(Ram* ram, string directory) {
   cout << "==============================" << endl;
   cout << endl;
 
-  return processes_pids;
+  return get_process_pid();
 };
+
+vector<int> Bootloader::get_process_pid() {
+  vector<int> pids;
+
+  if (ENABLED_GROUPING) {
+    JobGrouping jobGrouping(0.5);
+
+    vector<vector<int>> clusters = jobGrouping.clusterPrograms(this->programs);
+
+    for (int i = 0; i < (int)clusters.size(); i++) {
+      for (int j = 0; j < (int)clusters[i].size(); j++) {
+        pids.push_back(clusters[i][j]);
+      }
+    }
+
+    return pids;
+  }
+
+  for (int i = 0; i < PROGRAMS_COUNT; i++) pids.push_back(i);
+
+  return pids;
+}
 
 void Bootloader::validate_directory(string directory) {
   if (!fs::exists(directory) || !fs::is_directory(directory)) {

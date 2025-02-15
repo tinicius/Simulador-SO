@@ -1,6 +1,8 @@
 #ifndef CACHEFIFO_HPP
 #define CACHEFIFO_HPP
 
+#include <unistd.h>
+
 #include <queue>
 #include <string>
 #include <unordered_map>

@@ -2,6 +2,7 @@
 #define CACHELRU_HPP
 
 #include <pthread.h>
+#include <unistd.h>
 
 #include <list>
 #include <string>

@@ -47,7 +47,8 @@ bool OperatingSystem::check_finished() {
 }
 
 void OperatingSystem::log_processes_state() {
-  ofstream data_file("./output/process.log");
+  ofstream data_file("./output/process.log", ios::app);
+  ofstream cache_file("./output/cache.log", ios::app);
 
   data_file << endl << endl;
 
@@ -60,11 +61,14 @@ void OperatingSystem::log_processes_state() {
               << endl;
 
     data_file << endl;
+
+    cache_file << CACHE_HIT << " " << CACHE_MISS << endl;
   }
 
   data_file << endl;
 
   data_file.close();
+  cache_file.close();
 }
 
 void OperatingSystem::log_final() {

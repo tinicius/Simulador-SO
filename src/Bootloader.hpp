@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 
+#include "JobGrouping.hpp"
 #include "Ram.hpp"
 #include "entities.hpp"
 #include "globals.hpp"
@@ -22,6 +23,8 @@ class Bootloader {
 
   Process get_process(int pid, int pcb_address);
   ProcessControlBlock get_pcb(int pid, int program_address, int program_size);
+
+  vector<int> get_process_pid();
 
   void validate_directory(string directory);
 

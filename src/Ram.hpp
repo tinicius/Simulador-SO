@@ -1,6 +1,8 @@
 #ifndef RAM_HPP
 #define RAM_HPP
 
+#include <unistd.h>
+
 #include <fstream>
 #include <iostream>
 #include <string>

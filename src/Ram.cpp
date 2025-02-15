@@ -28,6 +28,8 @@ string Ram::get_instruction(int code_address, int PC) {
     exit(1);
   }
 
+  usleep(1000);
+
   return programs[code_address][PC];
 }
 

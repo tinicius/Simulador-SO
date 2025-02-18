@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 
+#include "Disk.hpp"
 #include "JobGrouping.hpp"
 #include "Ram.hpp"
 #include "entities.hpp"
@@ -32,7 +33,7 @@ class Bootloader {
   void load_program(string path);
 
  public:
-  vector<int> boot(Ram* ram, string directory);
+  vector<int> boot(Ram* ram, Disk* disk, string directory);
 };
 
 #endif

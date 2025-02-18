@@ -84,6 +84,8 @@ class Cpu {
 typedef struct CpuThreadArgs {
   Cpu* cpu;
   int pid;
+  int interrupt;
+  int disk_address;
 } CpuThreadArgs;
 
 void* run_core(void* args);

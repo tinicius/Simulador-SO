@@ -27,14 +27,26 @@ PipelineMips* Cpu::get_pipeline() { return &pipeline; }
 ULA* Cpu::get_ula() { return &ula; }
 
 string Cpu::get_instruction(int program_address, int PC) {
-  if (cache == nullptr) return ram->get_instruction(program_address, PC);
+  if (CACHE_TYPE != 1) {
+    if (cache == nullptr) return ram->get_instruction(program_address, PC);
 
-  string cached_instruction = cache->get_instruction(program_address, PC);
+    string cached_instruction = cache->get_instruction(program_address, PC);
 
-  if (cached_instruction != "") return cached_instruction;
+    if (cached_instruction != "") return cached_instruction;
 
-  string instruction = ram->get_instruction(program_address, PC);
-  cache->add_instruction(program_address, PC, instruction);
+    string instruction = ram->get_instruction(program_address, PC);
+    cache->add_instruction(program_address, PC, instruction);
+
+    return instruction;
+  }
+
+  auto page = ram->get_page(program_address);
+
+  if (page.pid != this->actual_pcb.pid) return "";
+
+  int offset = PC % PAGE_SIZE;
+
+  string instruction = page.instructions[offset];
 
   return instruction;
 }
@@ -106,9 +118,30 @@ void* run_core(void* args) {
 
   auto pipeline = cpu->get_pipeline();
 
-  while (pipeline->instruction_fetch(cpu->get_pc(),
-                                     cpu->actual_pcb.program_address,
-                                     cpu->actual_pcb.program_size)) {
+  while (true) {
+    if (cpu->get_pc() >= cpu->actual_pcb.program_size) break;
+
+    int page_idx = cpu->actual_pcb.PC / PAGE_SIZE;
+
+    if (cpu->actual_pcb.table_ram[page_idx] == -1) {
+      cpu_thread_args->interrupt = 1;
+      cpu_thread_args->disk_address = cpu->actual_pcb.table_disk[0];
+
+      break;
+    }
+
+    bool res = pipeline->instruction_fetch(cpu->get_pc(),
+                                           cpu->actual_pcb.table_ram[page_idx]);
+
+    if (!res) {
+      cpu->actual_pcb.table_ram[page_idx] = -1;
+
+      cpu_thread_args->interrupt = 1;
+      cpu_thread_args->disk_address = cpu->actual_pcb.table_disk[0];
+
+      break;
+    }
+
     pipeline->instruction_decode();
     pipeline->execute();
     pipeline->memory_access();
@@ -147,6 +180,8 @@ void* run_core(void* args) {
       cpu->log("Process " + to_string(pid) + " finished");
       cpu->log_all("Process " + to_string(pid) + " finished at time " +
                    to_string(end_in_nano));
+
+      cpu->get_ram()->dirty_page();
       break;
     }
 
@@ -173,11 +208,12 @@ void* run_core(void* args) {
 
       cpu->log("Quantum expired for process " + to_string(pid));
       cpu->log_all("Quantum expired for process " + to_string(pid));
+
+      cpu->get_ram()->dirty_page();
       break;
     }
   }
 
   pthread_mutex_unlock(&core_mutex[cpu->get_id()]);
-  free(cpu_thread_args);
   pthread_exit(NULL);
 }

@@ -16,16 +16,16 @@ class PipelineMips {
 
   ~PipelineMips() {}
 
-  bool instruction_fetch(int pc, int program_address, int program_size);
+  bool instruction_fetch(int pc, int program_address);
   void instruction_decode();
   void execute();
   void memory_access();
   void write_back();
 
+  string active_instruction;
+
  private:
   InstructionType operation = NOP;
-
-  string active_instruction;
 
   ControlUnit* control_unit;
 

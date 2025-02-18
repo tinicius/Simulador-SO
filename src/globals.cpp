@@ -10,6 +10,7 @@ int ENABLED_GROUPING;
 int CACHE_HIT;
 int CACHE_MISS;
 bool LOGS_ENABLED = true;
+int SWAP_COUNT = 0;
 
 vector<int> ready_process;
 

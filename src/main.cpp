@@ -5,6 +5,7 @@
 #include "CacheLRU.hpp"
 #include "Cpu.hpp"
 #include "CpuLogger.hpp"
+#include "Disk.hpp"
 #include "MemoryLogger.hpp"
 #include "OperatingSystem.hpp"
 #include "Ram.hpp"
@@ -95,6 +96,7 @@ int main(int argc, char* argv[]) {
 
   // Inicializando o hardware
   Ram ram;
+  Disk disk;
 
   CacheType* cache_type = get_cache_type();
   Cache cache(cache_type);
@@ -116,10 +118,10 @@ int main(int argc, char* argv[]) {
 
   // Boot
   Bootloader bootloader;
-  auto pids = bootloader.boot(&ram, "./dataset");
+  auto pids = bootloader.boot(&ram, &disk, "./dataset");
 
   // Inicializando SO
-  OperatingSystem so(&memory_logger, cores);
+  OperatingSystem so(&memory_logger, &ram, &disk, cores);
   so.boot(pids);
 
   return 0;

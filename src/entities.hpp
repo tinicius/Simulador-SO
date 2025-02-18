@@ -49,6 +49,9 @@ typedef struct ProcessControlBlock {
 
   ProcessState state = READY;
 
+  int table_ram[256];
+  int table_disk[256];
+
 } ProcessControlBlock;
 
 enum InstructionType {
@@ -65,5 +68,12 @@ enum InstructionType {
   BNE,
   NOP
 };
+
+#define PAGE_SIZE 256
+
+typedef struct {
+  int pid;
+  vector<string> instructions;
+} Page;
 
 #endif

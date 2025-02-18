@@ -1,8 +1,12 @@
 #include "OperatingSystem.hpp"
 
-OperatingSystem::OperatingSystem(MemoryLogger *memory_logger,
-                                 vector<Cpu> &cores)
-    : memory_logger(memory_logger), cores(cores), scheduler(nullptr) {
+OperatingSystem::OperatingSystem(MemoryLogger *memory_logger, Ram *ram,
+                                 Disk *disk, vector<Cpu> &cores)
+    : ram(ram),
+      disk(disk),
+      cores(cores),
+      memory_logger(memory_logger),
+      scheduler(nullptr) {
   Policy *policy = this->get_policy();
 
   this->scheduler = new Scheduler(policy);
@@ -67,6 +71,8 @@ void OperatingSystem::log_processes_state() {
 
   data_file << endl;
 
+  data_file << "Swap count:" << SWAP_COUNT << endl;
+
   data_file.close();
   cache_file.close();
 }
@@ -106,6 +112,9 @@ void *run_os(void *arg) {
       pthread_exit(NULL);
     }
 
+    vector<pthread_t> t_cores(CORES_COUNT);
+    vector<CpuThreadArgs *> args(CORES_COUNT, nullptr);
+
     for (int i = 0; i < CORES_COUNT; i++) {
       if (pthread_mutex_trylock(&core_mutex[i]) != 0) continue;
 
@@ -121,19 +130,50 @@ void *run_os(void *arg) {
         continue;
       }
 
-      CpuThreadArgs *args = (CpuThreadArgs *)malloc(sizeof(CpuThreadArgs));
+      args[i] = (CpuThreadArgs *)malloc(sizeof(CpuThreadArgs));
 
-      if (args == NULL) {
+      if (args[i] == NULL) {
         perror("Erro ao alocar memória para args");
         exit(EXIT_FAILURE);
       }
 
-      args->pid = next_pid;
-      args->cpu = os->get_core(i);
+      args[i]->pid = next_pid;
+      args[i]->cpu = os->get_core(i);
+      args[i]->interrupt = 0;
 
-      pthread_t t_core;
-      pthread_create(&t_core, NULL, run_core, args);
+      pthread_create(&(t_cores[i]), NULL, run_core, args[i]);
+
+      t_cores.push_back(t_cores[i]);
     }
+
+    for (int i = 0; i < CORES_COUNT; i++) pthread_join(t_cores[i], NULL);
+
+    for (int i = 0; i < CORES_COUNT; i++) {
+      if (args[i] == nullptr) continue;
+
+      if (args[i]->interrupt == 1) {
+        if (os->ram->is_full()) {
+          os->scheduler->add_ready(args[i]->pid);
+          continue;
+        }
+
+        SWAP_COUNT++;
+
+        Page page = os->disk->get_page(args[i]->disk_address);
+        int idx = os->ram->insert_page(page);
+
+        auto pcb = os->ram->get_PCB(args[i]->pid);
+
+        int page_idx = pcb.PC / PAGE_SIZE;
+
+        pcb.table_ram[page_idx] = idx;
+
+        os->ram->update_PCB(args[i]->pid, pcb);
+        os->scheduler->add_ready(args[i]->pid);
+      }
+    }
+
+    for (int i = 0; i < CORES_COUNT; i++) free(args[i]);
   }
 
   pthread_exit(NULL);

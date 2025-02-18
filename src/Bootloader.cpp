@@ -1,6 +1,6 @@
 #include "Bootloader.hpp"
 
-vector<int> Bootloader::boot(Ram* ram, string directory) {
+vector<int> Bootloader::boot(Ram* ram, Disk* disk, string directory) {
   cout << "========== Bootloader ==========" << endl;
 
   this->validate_directory(directory);
@@ -14,7 +14,20 @@ vector<int> Bootloader::boot(Ram* ram, string directory) {
   for (int i = 0; i < PROGRAMS_COUNT; i++) {
     ram->insert_program(this->programs[i]);
 
+    Page page;
+    page.pid = i;
+    page.instructions = this->programs[i];
+
+    disk->insert_page(page);
+
     auto pcb = this->get_pcb(i, i, this->programs[i].size());
+
+    pcb.table_disk[0] = i;
+
+    for (int idx = 0; idx < 256; idx++) {
+      pcb.table_ram[idx] = -1;
+    }
+
     ram->insert_PCB(pcb);
 
     auto process = this->get_process(i, i);

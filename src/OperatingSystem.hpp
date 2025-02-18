@@ -6,10 +6,12 @@
 #include <vector>
 
 #include "Cpu.hpp"
+#include "Disk.hpp"
 #include "PolicyFCFS.hpp"
 #include "PolicyRoundRobin.hpp"
 #include "PolicySJF.hpp"
 #include "PolicySRTN.hpp"
+#include "Ram.hpp"
 #include "Scheduler.hpp"
 #include "globals.hpp"
 
@@ -18,10 +20,12 @@ using namespace std;
 class OperatingSystem {
  private:
   MemoryLogger* memory_logger;
+
   vector<Cpu> cores;
 
  public:
-  OperatingSystem(MemoryLogger* memory_logger, vector<Cpu>& cores);
+  OperatingSystem(MemoryLogger* memory_logger, Ram* ram, Disk* disk,
+                  vector<Cpu>& cores);
   ~OperatingSystem();
 
   Scheduler* scheduler;
@@ -39,6 +43,9 @@ class OperatingSystem {
   Cpu* get_core(int core_id);
 
   Policy* get_policy();
+
+  Ram* ram;
+  Disk* disk;
 };
 
 void* run_os(void* arg);

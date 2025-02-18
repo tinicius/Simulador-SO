@@ -23,6 +23,7 @@ extern int ENABLED_GROUPING;
 extern int CACHE_HIT;
 extern int CACHE_MISS;
 extern bool LOGS_ENABLED;
+extern int SWAP_COUNT;
 
 extern vector<int> ready_process;
 

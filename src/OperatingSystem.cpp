@@ -2,11 +2,11 @@
 
 OperatingSystem::OperatingSystem(MemoryLogger *memory_logger, Ram *ram,
                                  Disk *disk, vector<Cpu> &cores)
-    : ram(ram),
-      disk(disk),
-      cores(cores),
+    : cores(cores),
       memory_logger(memory_logger),
-      scheduler(nullptr) {
+      scheduler(nullptr),
+      ram(ram),
+      disk(disk) {
   Policy *policy = this->get_policy();
 
   this->scheduler = new Scheduler(policy);
